@@ -11,27 +11,34 @@ import SwiftUI
 struct LandingView: View {
     
     @StateObject private var viewModel = LandingViewModel()
+    @State private var goToOnboarding = false
     
     var body: some View {
-        ZStack {
-            backgroundGradient
-            
-            VStack(spacing: 0) {
-                Spacer()
-                logoSection
-                Spacer().frame(height: 44)
-                titleSection
-                Spacer().frame(height: 20)
-                subtitleSection
-                Spacer()
-                getStartedButton
-                Spacer().frame(height: 56)
+        Group {
+            if goToOnboarding {
+                InstructOneView()
+            } else {
+                ZStack {
+                    backgroundGradient
+                    
+                    VStack(spacing: 0) {
+                        Spacer()
+                        logoSection
+                        Spacer().frame(height: 44)
+                        titleSection
+                        Spacer().frame(height: 20)
+                        subtitleSection
+                        Spacer()
+                        getStartedButton
+                        Spacer().frame(height: 56)
+                    }
+                    .padding(.horizontal, 32)
+                }
+                .ignoresSafeArea()
+                .onAppear {
+                    viewModel.startEntranceAnimations()
+                }
             }
-            .padding(.horizontal, 32)
-        }
-        .ignoresSafeArea()
-        .onAppear {
-            viewModel.startEntranceAnimations()
         }
     }
     
@@ -51,7 +58,6 @@ struct LandingView: View {
     // MARK: - Logo Section
     private var logoSection: some View {
         ZStack {
-            // Outer glow ring
             Circle()
                 .fill(Color.white.opacity(0.08))
                 .frame(width: 145, height: 145)
@@ -59,15 +65,13 @@ struct LandingView: View {
                 .scaleEffect(viewModel.logoGlow ? 1.08 : 1.0)
                 .animation(
                     .easeInOut(duration: 2.5).repeatForever(autoreverses: true),
-                    //value: viewModel.logoGlow
+                    value: viewModel.logoGlow
                 )
             
-            // White ring border
             Circle()
                 .strokeBorder(Color.white.opacity(0.9), lineWidth: 2.5)
                 .frame(width: 130, height: 130)
             
-            // Inner gradient fill
             Circle()
                 .fill(
                     RadialGradient(
@@ -79,21 +83,16 @@ struct LandingView: View {
                 )
                 .frame(width: 126, height: 126)
             
-            // Logo asset
             Image("logo")
                 .resizable()
                 .scaledToFit()
                 .frame(width: 140, height: 140)
         }
         .opacity(viewModel.logoAppeared ? 1 : 0)
-        //.scaleEffect(viewModel.logoAppeared ? 1 : 0.6)
         .animation(
             .spring(response: 0.7, dampingFraction: 0.6, blendDuration: 0).delay(0.2),
             value: viewModel.logoAppeared
         )
-        .onAppear {
-            //viewModel.startLogoGlow()
-        }
     }
     
     // MARK: - Title
@@ -119,7 +118,6 @@ struct LandingView: View {
     // MARK: - Subtitle
     private var subtitleSection: some View {
         Text("Study Group Finder, organized\nand Simplified")
-            //.font(.custom("Georgia", size: 17))
             .font(.system(size: 20).bold())
             .foregroundColor(.white.opacity(0.85))
             .multilineTextAlignment(.center)
@@ -134,41 +132,20 @@ struct LandingView: View {
     
     // MARK: - Get Started Button
     private var getStartedButton: some View {
-        Button(action: viewModel.handleGetStartedTap) {
+        Button {
+            goToOnboarding = true
+            viewModel.handleGetStartedTap()
+        } label: {
             ZStack {
-                // Base
                 RoundedRectangle(cornerRadius: 32)
                     .fill(Color.white)
                     .frame(height: 62)
-//                    .shadow(
-//                        color: Color.white.opacity(0.3),
-//                        radius: viewModel.buttonPulse ? 24 : 12,
-//                        x: 0, y: 0
-//                    )
-//                    .shadow(
-//                        color: Color(hex: "0A0A3E").opacity(0.25),
-//                        radius: 16, x: 0, y: 8
-//                    )
                     .scaleEffect(
                         viewModel.buttonPressed ? 0.96 : (viewModel.buttonPulse ? 1.015 : 1.0)
                     )
                 
-                // Shimmer sweep
-//                RoundedRectangle(cornerRadius: 32)
-//                    .fill(
-//                        LinearGradient(
-//                            colors: [.clear, Color.white.opacity(0.55), .clear],
-//                            startPoint: .leading,
-//                            endPoint: .trailing
-//                        )
-//                    )
-//                    .frame(height: 62)
-//                    .offset(x: viewModel.buttonShimmerOffset)
-//                    .clipShape(RoundedRectangle(cornerRadius: 32))
-                
-                // Label
                 Text("Get Started")
-                .font(.system(size: 22).bold())
+                    .font(.system(size: 22).bold())
                     .foregroundColor(Color(hex: "0A0A3E"))
                     .tracking(0.5)
             }
