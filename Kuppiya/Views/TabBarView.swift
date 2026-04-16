@@ -15,8 +15,8 @@ struct TabBarView: View {
             ZStack(alignment: .bottom) {
                 TabView(selection: $tabManager.activeTab) {
                     Tab(value: .home) {
-                        Text("Home")
-                        //HomeView()
+                        //Text("Home")
+                        HomeView()
                             .toolbarVisibility(.hidden, for: .tabBar)
                     }
                     Tab(value: .groups) {
