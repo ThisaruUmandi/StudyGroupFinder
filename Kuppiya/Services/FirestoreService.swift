@@ -12,7 +12,7 @@ class FirestoreService {
 
     func fetchUpcomingSession() async throws -> StudySession? {
         guard let uid = Auth.auth().currentUser?.uid else {
-            print("❌ No user logged in")
+            print("No user logged in")
             return nil
         }
 
@@ -23,10 +23,10 @@ class FirestoreService {
             .whereField("members", arrayContains: uid)
             .getDocuments()
 
-        print("📦 Groups found: \(groupSnap.documents.count)")
+        print("Groups found: \(groupSnap.documents.count)")
 
         guard !groupSnap.documents.isEmpty else {
-            print("⚠️ UID not in any group members[]")
+            print("UID not in any group members[]")
             return nil
         }
 
@@ -34,7 +34,7 @@ class FirestoreService {
 
         for doc in groupSnap.documents {
             let groupId = doc.documentID
-            print("📂 Group: \(groupId)")
+            print("Group: \(groupId)")
 
             // ← Simple fetch — no compound query, no index needed
             let allSnap = try await db
@@ -43,7 +43,7 @@ class FirestoreService {
                 .collection("sessions")
                 .getDocuments()
 
-            print("📋 Total sessions: \(allSnap.documents.count)")
+            print("Total sessions: \(allSnap.documents.count)")
 
             // ← Filter in Swift instead of Firestore
             let sessions = allSnap.documents
@@ -51,7 +51,7 @@ class FirestoreService {
                     do {
                         return try d.data(as: StudySession.self)
                     } catch {
-                        print("❌ Decode error: \(error)")
+                        print("Decode error: \(error)")
                         return nil
                     }
                 }
@@ -60,12 +60,12 @@ class FirestoreService {
                     $0.date > Date()
                 }
 
-            print("📅 Upcoming filtered: \(sessions.count)")
+            print("Upcoming filtered: \(sessions.count)")
             upcoming.append(contentsOf: sessions)
         }
 
         let result = upcoming.sorted { $0.date < $1.date }.first
-        print("✅ Session: \(result?.title ?? "none")")
+        print("Session: \(result?.title ?? "none")")
         return result
     }
 
@@ -97,7 +97,7 @@ class FirestoreService {
         var newSession = session
         newSession.sessionId = docRef.documentID
         try docRef.setData(from: newSession)
-        print("✅ Session created: \(docRef.documentID)")
+        print("Session created: \(docRef.documentID)")
     }
 
     func updateSessionStatus(
@@ -123,7 +123,7 @@ class FirestoreService {
             .collection("sessions")
             .document(sessionId)
             .delete()
-        print("🗑️ Session deleted: \(sessionId)")
+        print("Session deleted: \(sessionId)")
     }
 
     // ─────────────────────────────────────────────
@@ -160,7 +160,7 @@ class FirestoreService {
             createdBy: uid,
             members: [uid],
             privacy: privacy,
-            mode: mode,
+            //mode: mode,
             university: university,
             createdAt: Date()
         )
@@ -174,7 +174,7 @@ class FirestoreService {
                     [docRef.documentID])
             ])
 
-        print("✅ Group created: \(docRef.documentID) by \(username)")
+        print("Group created: \(docRef.documentID) by \(username)")
         return newGroup
     }
 
@@ -243,7 +243,7 @@ class FirestoreService {
             .collection("studyGroups")
             .document(groupId)
             .delete()
-        print("🗑️ Group deleted: \(groupId)")
+        print("Group deleted: \(groupId)")
     }
 
     // ─────────────────────────────────────────────
@@ -264,7 +264,7 @@ class FirestoreService {
         let groupIds = groupSnap.documents
             .map { $0.documentID }
 
-        print("👑 Admin of \(groupIds.count) groups")
+        print("Admin of \(groupIds.count) groups")
 
         guard !groupIds.isEmpty else { return [] }
 
@@ -274,7 +274,7 @@ class FirestoreService {
             .whereField("status", isEqualTo: "pending")
             .getDocuments()
 
-        print("📬 Pending requests: \(requestSnap.documents.count)")
+        print("Pending requests: \(requestSnap.documents.count)")
 
         return requestSnap.documents.compactMap {
             try? $0.data(as: JoinRequest.self)
@@ -297,7 +297,7 @@ class FirestoreService {
             .getDocuments()
 
         guard existing.documents.isEmpty else {
-            print("⚠️ Request already sent")
+            print("Request already sent")
             return
         }
 
@@ -314,7 +314,7 @@ class FirestoreService {
             .collection("joinRequests")
             .addDocument(data: request)
 
-        print("✅ Join request sent to: \(group.name)")
+        print("Join request sent to: \(group.name)")
     }
 
     func approveJoinRequest(
@@ -341,7 +341,7 @@ class FirestoreService {
                 "joinedGroups": FieldValue.arrayUnion([request.groupId])
             ])
 
-        print("✅ Approved: \(request.senderName)")
+        print("Approved: \(request.senderName)")
     }
 
     func rejectJoinRequest(
@@ -354,7 +354,7 @@ class FirestoreService {
             .document(requestId)
             .updateData(["status": "rejected"])
 
-        print("✅ Rejected: \(request.senderName)")
+        print("Rejected: \(request.senderName)")
     }
 
     func joinPublicGroup(_ group: StudyGroup) async throws {
@@ -376,7 +376,7 @@ class FirestoreService {
                 "joinedGroups": FieldValue.arrayUnion([group.groupId])
             ])
 
-        print("✅ Joined: \(group.name)")
+        print("Joined: \(group.name)")
     }
 
     func leaveGroup(groupId: String) async throws {
@@ -398,7 +398,7 @@ class FirestoreService {
                 "joinedGroups": FieldValue.arrayRemove([groupId])
             ])
 
-        print("✅ Left group: \(groupId)")
+        print("Left group: \(groupId)")
     }
 
     // ─────────────────────────────────────────────

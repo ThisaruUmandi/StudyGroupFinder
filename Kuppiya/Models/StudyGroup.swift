@@ -18,17 +18,12 @@ struct StudyGroup: Codable, Identifiable {
     var createdBy: String
     var members: [String]
     var privacy: String
-    var mode: String
     var university: String
     var createdAt: Date
 
     var isPrivate: Bool { privacy == "private" }
     var memberCount: Int { members.count }
 
-    func isAdmin(uid: String) -> Bool {
-        createdBy == uid
-    }
-    func isMember(uid: String) -> Bool {
-        members.contains(uid)
-    }
+    func isAdmin(uid: String) -> Bool { createdBy == uid }
+    func isMember(uid: String) -> Bool { members.contains(uid) }
 }

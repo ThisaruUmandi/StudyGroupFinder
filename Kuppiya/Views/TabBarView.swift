@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct TabBarView: View {
+    @EnvironmentObject var authVM: AuthViewModel
     @StateObject private var tabManager = TabBarViewModel()
 
     var body: some View {
@@ -17,11 +18,13 @@ struct TabBarView: View {
                     Tab(value: .home) {
                         //Text("Home")
                         HomeView()
+                            .environmentObject(authVM)
                             .toolbarVisibility(.hidden, for: .tabBar)
                     }
                     Tab(value: .groups) {
-                        Text("My Groups")
-                        //MapView()
+                        //Text("My Groups")
+                        GroupsView()
+                            .environmentObject(authVM)
                             .toolbarVisibility(.hidden, for: .tabBar)
                     }
                     Tab(value: .activity) {
@@ -61,4 +64,5 @@ extension UIView {
 
 #Preview {
     TabBarView()
+        .environmentObject(AuthViewModel())
 }
