@@ -19,35 +19,37 @@ struct LoginView: View {
 
     var body: some View {
         ZStack {
-            Color(UIColor.systemGray5).ignoresSafeArea()
+            Color(UIColor.white).ignoresSafeArea()
 
             VStack(spacing: 0) {
 
                 // MARK: Title
                 VStack(spacing: 6) {
                     Text("Login")
-                        .font(.system(size: 28, weight: .bold))
+                        .font(.system(size: 32, weight: .bold))
                         .foregroundColor(.black)
-                    Text("One step closer to Group studies")
-                        .font(.system(size: 14, weight: .medium))
+                    Text("Welcome back to Kuppiya!")
+                        .font(.system(size: 16, weight: .medium))
                         .foregroundColor(.black)
+                        .padding(.top, 5)
                 }
                 .padding(.top, 48)
+                
+                Image("upboy")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 90, height: 90)
+                    //.offset(y: -40)
+                    .padding(.top, 16)
 
                 // MARK: Card
                 ZStack(alignment: .top) {
                     RoundedRectangle(cornerRadius: 24)
-                        .fill(Color.white)
+                        .fill(Color.gray.opacity(0.15))
                         .shadow(color: .black.opacity(0.06),
                                 radius: 12, x: 0, y: 4)
 
                     VStack(spacing: 16) {
-                        Image("upboy")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 90, height: 90)
-                            .offset(y: -40)
-                            .padding(.top, 8)
 
                         // Email
                         CustomTextField(
@@ -78,7 +80,7 @@ struct LoginView: View {
                             .foregroundColor(.black)
                         }
                         .padding(.horizontal, 4)
-                        .padding(.top, -4)
+                        .padding(.top, 0)
 
                         // Login button
                         Button {
@@ -97,19 +99,19 @@ struct LoginView: View {
                                 }
                             }
                             .frame(maxWidth: .infinity)
-                            .frame(height: 52)
-                            .background(Color(hex: "#1A1ADB"))
+                            .frame(height: 55)
+                            .background(Color(hex: "#0300BF"))
                             .cornerRadius(30)
                         }
                         .disabled(authViewModel.isLoading)
-                        .padding(.top, 4)
+                        .padding(.top, 30)
                         .padding(.bottom, 24)
                     }
                     .padding(.horizontal, 20)
-                    .padding(.top, 50)
+                    .padding(.top, 60)
                 }
                 .padding(.horizontal, 20)
-                .padding(.top, 40)
+                .padding(.top, -25)
 
                 // MARK: Divider
                 HStack {
@@ -125,9 +127,9 @@ struct LoginView: View {
                         .foregroundColor(.gray.opacity(0.4))
                 }
                 .padding(.horizontal, 40)
-                .padding(.top, 28)
+                .padding(.top, 60)
 
-                // MARK: Social + Face ID
+                // MARK: Social buttons + Face ID
                 HStack(spacing: 20) {
                     // Google
                     SocialButton(imageName: "google") {
@@ -142,7 +144,7 @@ struct LoginView: View {
                             Circle()
                                 .stroke(
                                     biometric.hasSavedCredentials
-                                    ? Color(hex: "#1A1ADB")
+                                    ? Color(hex: "#0300BF")
                                     : Color.gray.opacity(0.3),
                                     lineWidth: biometric.hasSavedCredentials ? 2 : 1
                                 )
@@ -153,7 +155,7 @@ struct LoginView: View {
                                 .frame(width: 26, height: 26)
                                 .foregroundColor(
                                     biometric.hasSavedCredentials
-                                    ? Color(hex: "#1A1ADB")
+                                    ? Color(hex: "#0300BF")
                                     : .gray
                                 )
                         }
@@ -165,7 +167,7 @@ struct LoginView: View {
                         isSystemImage: true
                     ) {}
                 }
-                .padding(.top, 20)
+                .padding(.top, 30)
 
                 // Face ID hint
                 if biometric.isBiometricAvailable {
@@ -186,13 +188,21 @@ struct LoginView: View {
                         currentScreen = .signup
                     }
                     .font(.system(size: 14, weight: .bold))
-                    .foregroundColor(Color(hex: "#1A1ADB"))
+                    .foregroundColor(Color(hex: "#0300BF"))
                 }
-                .padding(.top, 24)
+                .padding(.top, 30)
+                .padding(.bottom, 15)
 
                 Spacer()
             }
         }
+        .onAppear {
+            if biometric.hasSavedCredentials &&
+               biometric.isBiometricAvailable {
+                Task { await authViewModel.loginWithFaceID() }
+            }
+        }
+        
         // MARK: Forgot Password Sheet
         .sheet(isPresented: $showForgotSheet) {
             ForgotPasswordSheet(
@@ -251,7 +261,7 @@ struct ForgotPasswordSheet: View {
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
                     .frame(height: 52)
-                    .background(Color(hex: "#1A1ADB"))
+                    .background(Color(hex: "#0300BF"))
                     .cornerRadius(30)
             }
             .padding(.horizontal, 24)

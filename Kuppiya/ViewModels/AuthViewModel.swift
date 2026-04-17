@@ -126,6 +126,42 @@ class AuthViewModel: ObservableObject {
     // ─────────────────────────────────────
     // MARK: - Face ID Login
     // ─────────────────────────────────────
+    
+    // MARK: - Auto Face ID (call this when LoginView appears)
+    func tryAutoFaceID() async {
+        // Only auto-trigger if:
+        // 1. User has saved credentials
+        // 2. Face ID is available
+        guard biometricService.hasSavedCredentials,
+              biometricService.isBiometricAvailable else {
+            return  // silently do nothing — no error shown
+        }
+
+        let success = await biometricService.authenticate()
+        guard success else {
+            return  // silently fail — don't show error on auto-trigger
+        }
+
+        guard let creds = biometricService.loadCredentials() else {
+            return
+        }
+
+        isLoading = true
+        do {
+            let user = try await authService.signIn(
+                email: creds.email,
+                password: creds.password
+            )
+            currentUser = user
+            isLoggedIn  = true
+        } catch {
+            showError(message: error.localizedDescription)
+        }
+        isLoading = false
+    }
+    
+    //-----------------------------
+    
     func loginWithFaceID() async {
         guard biometricService.hasSavedCredentials else {
             showError(message: "Please log in with email first to enable Face ID.")
