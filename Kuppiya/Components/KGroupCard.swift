@@ -49,7 +49,7 @@ struct KGroupCard: View {
                             Image(systemName: "calendar")
                                 .font(.system(size: 10))
                                 .foregroundColor(.gray)
-                            Text("\(sessionCount) sessions this week")
+                            Text("\(sessionCount) sessions")
                                 .font(.system(size: 12))
                                 .foregroundColor(.gray)
                         }
@@ -63,11 +63,11 @@ struct KGroupCard: View {
                     .font(.system(size: 13, weight: .medium))
                     .foregroundColor(.gray.opacity(0.5))
             }
-            .padding(.horizontal, 16)
+            .padding(.horizontal, 10)
             .padding(.vertical, 14)
             .background(Color.white)
             .cornerRadius(16)
-            .shadow(color: .black.opacity(0.04),
+            .shadow(color: .black.opacity(0.1),
                     radius: 6, x: 0, y: 2)
         }
     }

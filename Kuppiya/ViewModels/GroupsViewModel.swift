@@ -72,12 +72,12 @@ class GroupsViewModel: ObservableObject {
         isLoading = true
         do {
             // Temporary: test if service is reachable at all
-            print("⏳ Calling fetchMyGroups...")
+            print("Calling fetchMyGroups...")
             myGroups = try await service.fetchMyGroups()
-            print("✅ My groups: \(myGroups.count)")
+            print("My groups: \(myGroups.count)")
             await fetchSessionCounts()
         } catch {
-            print("❌ fetchMyGroups threw: \(error.localizedDescription)")
+            print("fetchMyGroups threw: \(error.localizedDescription)")
             errorMessage = error.localizedDescription
             showError = true
         }

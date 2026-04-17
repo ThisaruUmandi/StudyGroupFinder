@@ -16,7 +16,8 @@ struct GroupsView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color(UIColor.systemGray6).ignoresSafeArea()
+                //Color(UIColor.systemGray6).ignoresSafeArea()
+                Color(UIColor.white).ignoresSafeArea()
 
                 VStack(spacing: 0) {
 
@@ -39,12 +40,14 @@ struct GroupsView: View {
                             .resizable()
                             .scaledToFit()
                             .frame(height: 110)
-                            .padding(.bottom, 8)
+                            .padding(.bottom, -15)
+                            .zIndex(1)
 
                         // Search
                         KSearchBar(text: $viewModel.searchText)
                             .padding(.horizontal, 20)
                             .padding(.bottom, 16)
+                            .padding(.top, 8)
                     }
                     .background(Color.white)
 

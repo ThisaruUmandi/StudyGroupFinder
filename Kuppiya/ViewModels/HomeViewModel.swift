@@ -36,12 +36,12 @@ class HomeViewModel: ObservableObject {
             upcomingSession = try await session
             joinRequests    = try await requests
 
-            print("✅ Session loaded: \(upcomingSession?.title ?? "none")")
+            print("Session loaded: \(upcomingSession?.title ?? "none")")
             print("✅ Requests loaded: \(joinRequests.count)")
         } catch {
             errorMessage = error.localizedDescription
             showError    = true
-            print("❌ HomeViewModel error: \(error)")
+            print("HomeViewModel error: \(error)")
         }
         isLoading = false
     }

@@ -34,6 +34,8 @@ struct HomeView: View {
                             // MARK: Search
                             KSearchBar(text: $viewModel.searchText)
                                 .padding(.horizontal, 20)
+                                .padding(.top, 6)
+                                .padding(.bottom, 20)
 
                             // MARK: Action Cards
                             HStack(spacing: 12) {
@@ -47,7 +49,7 @@ struct HomeView: View {
                                 }
 
                                 KActionCard(
-                                    icon: "list.bullet.rectangle.portrait",
+                                    icon: "magnifyingglass",
                                     title: "Browse Groups",
                                     subtitle: "Discover communities",
                                     bgColor: Color(hex: "#E0F5EE")
@@ -56,6 +58,7 @@ struct HomeView: View {
                                 }
                             }
                             .padding(.horizontal, 20)
+                            .padding(.bottom, 20)
 
                             // MARK: Upcoming Sessions
                             VStack(alignment: .leading, spacing: 12) {
@@ -209,18 +212,20 @@ struct HomeGreetingView: View {
         HStack(alignment: .center) {
             VStack(alignment: .leading, spacing: 2) {
                 Text("What would you")
-                    .font(.system(size: 24, weight: .bold))
+                    .font(.system(size: 28, weight: .bold))
                     .foregroundColor(.black)
                 Text("like to do today?")
-                    .font(.system(size: 24, weight: .bold))
+                    .font(.system(size: 28, weight: .bold))
                     .foregroundColor(Color(hex: "#6B3FD4"))
             }
             Spacer()
             Image("home_girl")
                 .resizable()
                 .scaledToFit()
-                .frame(width: 90, height: 90)
-                .padding()
+                .frame(width: 105, height: 110)
+                .padding(.horizontal)
+                .padding(.bottom, -25)
+                .zIndex(1)
         }
     }
 }
