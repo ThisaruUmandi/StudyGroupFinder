@@ -6,9 +6,9 @@ class FirestoreService {
     static let shared = FirestoreService()
     private let db = Firestore.firestore()
 
-    // ─────────────────────────────────────────────
+    // -----------------------------------------------
     // MARK: - Sessions
-    // ─────────────────────────────────────────────
+    // -----------------------------------------------
 
     func fetchUpcomingSession() async throws -> StudySession? {
         guard let uid = Auth.auth().currentUser?.uid else {
@@ -67,9 +67,7 @@ class FirestoreService {
         return result
     }
 
-    func fetchSessions(
-        for groupId: String
-    ) async throws -> [StudySession] {
+    func fetchSessions(for groupId: String) async throws -> [StudySession] {
         let snap = try await db
             .collection("studyGroups")
             .document(groupId)
@@ -82,10 +80,7 @@ class FirestoreService {
         }
     }
 
-    func createSession(
-        _ session: StudySession,
-        in groupId: String
-    ) async throws {
+    func createSession(_ session: StudySession, in groupId: String) async throws {
         let docRef = db
             .collection("studyGroups")
             .document(groupId)
@@ -95,6 +90,17 @@ class FirestoreService {
         var newSession = session
         newSession.sessionId = docRef.documentID
         try docRef.setData(from: newSession)
+
+        // Log activity
+        guard let uid = Auth.auth().currentUser?.uid else { return }
+        try await logActivity(
+            groupId: groupId,
+            actorId: uid,
+            action: "created a session",
+            target: session.title,
+            type: "session"
+        )
+
         print("Session created: \(docRef.documentID)")
     }
 
@@ -111,10 +117,7 @@ class FirestoreService {
             .updateData(["status": status])
     }
 
-    func deleteSession(
-        sessionId: String,
-        groupId: String
-    ) async throws {
+    func deleteSession(sessionId: String, groupId: String) async throws {
         try await db
             .collection("studyGroups")
             .document(groupId)
@@ -124,9 +127,9 @@ class FirestoreService {
         print("Session deleted: \(sessionId)")
     }
 
-    // ─────────────────────────────────────────────
+    // -----------------------------------------------
     // MARK: - Study Groups
-    // ─────────────────────────────────────────────
+    // -----------------------------------------------
 
     func createGroup(
         name: String,
@@ -145,7 +148,6 @@ class FirestoreService {
         let groupId = docRef.documentID
         let inviteLink = "https://kuppiya.app/join?groupId=\(groupId)"
 
-        // Always include creator, add initial members without dupes
         var allMembers = [uid]
         for memberId in initialMembers {
             if !allMembers.contains(memberId) {
@@ -182,7 +184,15 @@ class FirestoreService {
                 ])
         }
 
-        print("Group created: \(groupId)")
+        // Log activity
+        try await logActivity(
+            groupId: groupId,
+            actorId: uid,
+            action: "created this group",
+            type: "member"
+        )
+
+        print("✅ Group created: \(groupId)")
         return newGroup
     }
 
@@ -215,9 +225,7 @@ class FirestoreService {
     }
 
     func fetchMyGroups() async throws -> [StudyGroup] {
-        guard let uid = Auth.auth().currentUser?.uid else {
-            return []
-        }
+        guard let uid = Auth.auth().currentUser?.uid else { return [] }
         let snap = try await db
             .collection("studyGroups")
             .whereField("members", arrayContains: uid)
@@ -236,10 +244,7 @@ class FirestoreService {
         return try? doc.data(as: StudyGroup.self)
     }
 
-    func updateGroup(
-        groupId: String,
-        data: [String: Any]
-    ) async throws {
+    func updateGroup(groupId: String, data: [String: Any]) async throws {
         try await db
             .collection("studyGroups")
             .document(groupId)
@@ -254,14 +259,12 @@ class FirestoreService {
         print("Group deleted: \(groupId)")
     }
 
-    // ─────────────────────────────────────────────
+    // -----------------------------------------------
     // MARK: - Join Requests
-    // ─────────────────────────────────────────────
+    // -----------------------------------------------
 
     func fetchPendingJoinRequests() async throws -> [JoinRequest] {
-        guard let uid = Auth.auth().currentUser?.uid else {
-            return []
-        }
+        guard let uid = Auth.auth().currentUser?.uid else { return [] }
 
         let groupSnap = try await db
             .collection("studyGroups")
@@ -286,10 +289,7 @@ class FirestoreService {
         }
     }
 
-    func sendJoinRequest(
-        group: StudyGroup,
-        senderName: String
-    ) async throws {
+    func sendJoinRequest(group: StudyGroup, senderName: String) async throws {
         guard let uid = Auth.auth().currentUser?.uid else { return }
 
         let existing = try await db
@@ -332,6 +332,14 @@ class FirestoreService {
             .document(request.senderId)
             .updateData(["joinedGroups": FieldValue.arrayUnion([request.groupId])])
 
+        // Log activity — member joined
+        try await logActivity(
+            groupId: request.groupId,
+            actorId: request.senderId,
+            action: "joined the group",
+            type: "member"
+        )
+
         print("Approved: \(request.senderName)")
     }
 
@@ -356,6 +364,14 @@ class FirestoreService {
             .document(uid)
             .updateData(["joinedGroups": FieldValue.arrayUnion([group.groupId])])
 
+        // Log activity
+        try await logActivity(
+            groupId: group.groupId,
+            actorId: uid,
+            action: "joined the group",
+            type: "member"
+        )
+
         print("Joined: \(group.name)")
     }
 
@@ -370,12 +386,59 @@ class FirestoreService {
             .document(uid)
             .updateData(["joinedGroups": FieldValue.arrayRemove([groupId])])
 
+        // Log activity
+        try await logActivity(
+            groupId: groupId,
+            actorId: uid,
+            action: "left the group",
+            type: "member"
+        )
+
         print("Left group: \(groupId)")
     }
 
-    // ─────────────────────────────────────────────
+    // -----------------------------------------------
+    // MARK: - Activities
+    // -----------------------------------------------
+
+    func fetchActivities(for groupId: String) async throws -> [Activity] {
+        let snap = try await db
+            .collection("studyGroups")
+            .document(groupId)
+            .collection("activities")
+            .order(by: "createdAt", descending: true)
+            .limit(to: 20)
+            .getDocuments()
+
+        return snap.documents
+            .compactMap { try? $0.data(as: Activity.self) }
+            .filter { $0.type != "request" }
+    }
+
+    func logActivity(
+        groupId: String,
+        actorId: String,
+        action: String,
+        target: String? = nil,
+        type: String
+    ) async throws {
+        let data: [String: Any] = [
+            "actorId"  : actorId,
+            "action"   : action,
+            "target"   : target ?? "",
+            "type"     : type,
+            "createdAt": Timestamp(date: Date())
+        ]
+        try await db
+            .collection("studyGroups")
+            .document(groupId)
+            .collection("activities")
+            .addDocument(data: data)
+    }
+
+    // -----------------------------------------------
     // MARK: - Users
-    // ─────────────────────────────────────────────
+    // -----------------------------------------------
 
     func fetchAllUsers() async throws -> [AppUser] {
         let snap = try await db
@@ -413,11 +476,12 @@ class FirestoreService {
             try? $0.data(as: AppUser.self)
         }
     }
-}
 
-// ─────────────────────────────────────────────
+} // ← class closes here
+
+// -----------------------------------------------
 // MARK: - Errors
-// ─────────────────────────────────────────────
+// -----------------------------------------------
 enum FirestoreError: LocalizedError {
     case notLoggedIn
     case groupNotFound

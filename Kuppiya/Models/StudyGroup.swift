@@ -21,6 +21,7 @@ struct StudyGroup: Codable, Identifiable, Equatable {
     var university: String
     var createdAt: Date
     var inviteLink: String?
+    var groupImageURL: String?
 
     var isPrivate: Bool { privacy == "private" }
     var memberCount: Int { members.count }
