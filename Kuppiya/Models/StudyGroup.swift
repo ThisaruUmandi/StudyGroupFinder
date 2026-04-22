@@ -8,7 +8,7 @@
 import Foundation
 import FirebaseFirestore
 
-struct StudyGroup: Codable, Identifiable {
+struct StudyGroup: Codable, Identifiable, Equatable {
     @DocumentID var id: String?
     var groupId: String
     var name: String
@@ -20,6 +20,7 @@ struct StudyGroup: Codable, Identifiable {
     var privacy: String
     var university: String
     var createdAt: Date
+    var inviteLink: String?
 
     var isPrivate: Bool { privacy == "private" }
     var memberCount: Int { members.count }

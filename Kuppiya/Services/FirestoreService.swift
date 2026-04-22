@@ -36,7 +36,6 @@ class FirestoreService {
             let groupId = doc.documentID
             print("Group: \(groupId)")
 
-            // ← Simple fetch — no compound query, no index needed
             let allSnap = try await db
                 .collection("studyGroups")
                 .document(groupId)
@@ -45,7 +44,6 @@ class FirestoreService {
 
             print("Total sessions: \(allSnap.documents.count)")
 
-            // ← Filter in Swift instead of Firestore
             let sessions = allSnap.documents
                 .compactMap { d -> StudySession? in
                     do {
@@ -136,45 +134,55 @@ class FirestoreService {
         major: String,
         description: String,
         privacy: String,
-        mode: String,
-        university: String
+        university: String,
+        initialMembers: [String] = []
     ) async throws -> StudyGroup {
         guard let uid = Auth.auth().currentUser?.uid else {
             throw FirestoreError.notLoggedIn
         }
 
-        let userDoc = try await db
-            .collection("users")
-            .document(uid)
-            .getDocument()
-        let username = userDoc.data()?["username"] as? String ?? ""
-
         let docRef = db.collection("studyGroups").document()
+        let groupId = docRef.documentID
+        let inviteLink = "https://kuppiya.app/join?groupId=\(groupId)"
+
+        // Always include creator, add initial members without dupes
+        var allMembers = [uid]
+        for memberId in initialMembers {
+            if !allMembers.contains(memberId) {
+                allMembers.append(memberId)
+            }
+        }
 
         let newGroup = StudyGroup(
-            groupId: docRef.documentID,
+            groupId: groupId,
             name: name,
             subject: subject,
             major: major,
             description: description,
             createdBy: uid,
-            members: [uid],
+            members: allMembers,
             privacy: privacy,
-            //mode: mode,
             university: university,
-            createdAt: Date()
+            createdAt: Date(),
+            inviteLink: inviteLink
         )
 
         try docRef.setData(from: newGroup)
 
-        try await db.collection("users")
-            .document(uid)
-            .updateData([
-                "joinedGroups": FieldValue.arrayUnion(
-                    [docRef.documentID])
-            ])
+        // Update joinedGroups for all members
+        for memberId in allMembers {
+            guard !memberId.isEmpty else {
+                print("Skipping empty memberId")
+                continue
+            }
+            try await db.collection("users")
+                .document(memberId)
+                .updateData([
+                    "joinedGroups": FieldValue.arrayUnion([groupId])
+                ])
+        }
 
-        print("Group created: \(docRef.documentID) by \(username)")
+        print("Group created: \(groupId)")
         return newGroup
     }
 
@@ -255,15 +263,12 @@ class FirestoreService {
             return []
         }
 
-        // ← Use documentID not groupId field
         let groupSnap = try await db
             .collection("studyGroups")
             .whereField("createdBy", isEqualTo: uid)
             .getDocuments()
 
-        let groupIds = groupSnap.documents
-            .map { $0.documentID }
-
+        let groupIds = groupSnap.documents.map { $0.documentID }
         print("Admin of \(groupIds.count) groups")
 
         guard !groupIds.isEmpty else { return [] }
@@ -285,9 +290,7 @@ class FirestoreService {
         group: StudyGroup,
         senderName: String
     ) async throws {
-        guard let uid = Auth.auth().currentUser?.uid else {
-            return
-        }
+        guard let uid = Auth.auth().currentUser?.uid else { return }
 
         let existing = try await db
             .collection("joinRequests")
@@ -310,47 +313,32 @@ class FirestoreService {
             "createdAt" : Timestamp(date: Date())
         ]
 
-        try await db
-            .collection("joinRequests")
-            .addDocument(data: request)
-
+        try await db.collection("joinRequests").addDocument(data: request)
         print("Join request sent to: \(group.name)")
     }
 
-    func approveJoinRequest(
-        _ request: JoinRequest
-    ) async throws {
+    func approveJoinRequest(_ request: JoinRequest) async throws {
         guard let requestId = request.id else { return }
 
-        try await db
-            .collection("joinRequests")
+        try await db.collection("joinRequests")
             .document(requestId)
             .updateData(["status": "approved"])
 
-        try await db
-            .collection("studyGroups")
+        try await db.collection("studyGroups")
             .document(request.groupId)
-            .updateData([
-                "members": FieldValue.arrayUnion([request.senderId])
-            ])
+            .updateData(["members": FieldValue.arrayUnion([request.senderId])])
 
-        try await db
-            .collection("users")
+        try await db.collection("users")
             .document(request.senderId)
-            .updateData([
-                "joinedGroups": FieldValue.arrayUnion([request.groupId])
-            ])
+            .updateData(["joinedGroups": FieldValue.arrayUnion([request.groupId])])
 
         print("Approved: \(request.senderName)")
     }
 
-    func rejectJoinRequest(
-        _ request: JoinRequest
-    ) async throws {
+    func rejectJoinRequest(_ request: JoinRequest) async throws {
         guard let requestId = request.id else { return }
 
-        try await db
-            .collection("joinRequests")
+        try await db.collection("joinRequests")
             .document(requestId)
             .updateData(["status": "rejected"])
 
@@ -358,45 +346,29 @@ class FirestoreService {
     }
 
     func joinPublicGroup(_ group: StudyGroup) async throws {
-        guard let uid = Auth.auth().currentUser?.uid else {
-            return
-        }
+        guard let uid = Auth.auth().currentUser?.uid else { return }
 
-        try await db
-            .collection("studyGroups")
+        try await db.collection("studyGroups")
             .document(group.groupId)
-            .updateData([
-                "members": FieldValue.arrayUnion([uid])
-            ])
+            .updateData(["members": FieldValue.arrayUnion([uid])])
 
-        try await db
-            .collection("users")
+        try await db.collection("users")
             .document(uid)
-            .updateData([
-                "joinedGroups": FieldValue.arrayUnion([group.groupId])
-            ])
+            .updateData(["joinedGroups": FieldValue.arrayUnion([group.groupId])])
 
         print("Joined: \(group.name)")
     }
 
     func leaveGroup(groupId: String) async throws {
-        guard let uid = Auth.auth().currentUser?.uid else {
-            return
-        }
+        guard let uid = Auth.auth().currentUser?.uid else { return }
 
-        try await db
-            .collection("studyGroups")
+        try await db.collection("studyGroups")
             .document(groupId)
-            .updateData([
-                "members": FieldValue.arrayRemove([uid])
-            ])
+            .updateData(["members": FieldValue.arrayRemove([uid])])
 
-        try await db
-            .collection("users")
+        try await db.collection("users")
             .document(uid)
-            .updateData([
-                "joinedGroups": FieldValue.arrayRemove([groupId])
-            ])
+            .updateData(["joinedGroups": FieldValue.arrayRemove([groupId])])
 
         print("Left group: \(groupId)")
     }
@@ -404,6 +376,16 @@ class FirestoreService {
     // ─────────────────────────────────────────────
     // MARK: - Users
     // ─────────────────────────────────────────────
+
+    func fetchAllUsers() async throws -> [AppUser] {
+        let snap = try await db
+            .collection("users")
+            .limit(to: 100)
+            .getDocuments()
+        return snap.documents.compactMap {
+            try? $0.data(as: AppUser.self)
+        }
+    }
 
     func fetchUser(uid: String) async throws -> AppUser? {
         let doc = try await db
@@ -413,12 +395,8 @@ class FirestoreService {
         return try? doc.data(as: AppUser.self)
     }
 
-    func updateUser(
-        uid: String,
-        data: [String: Any]
-    ) async throws {
-        try await db
-            .collection("users")
+    func updateUser(uid: String, data: [String: Any]) async throws {
+        try await db.collection("users")
             .document(uid)
             .updateData(data)
     }
@@ -426,10 +404,8 @@ class FirestoreService {
     func searchUsers(query: String) async throws -> [AppUser] {
         let snap = try await db
             .collection("users")
-            .whereField("username",
-                isGreaterThanOrEqualTo: query)
-            .whereField("username",
-                isLessThanOrEqualTo: query + "\u{f8ff}")
+            .whereField("username", isGreaterThanOrEqualTo: query)
+            .whereField("username", isLessThanOrEqualTo: query + "\u{f8ff}")
             .limit(to: 20)
             .getDocuments()
 
@@ -450,10 +426,10 @@ enum FirestoreError: LocalizedError {
 
     var errorDescription: String? {
         switch self {
-        case .notLoggedIn:    return "You must be logged in."
-        case .groupNotFound:  return "Study group not found."
+        case .notLoggedIn:     return "You must be logged in."
+        case .groupNotFound:   return "Study group not found."
         case .sessionNotFound: return "Session not found."
-        case .alreadyMember:  return "Already a member."
+        case .alreadyMember:   return "Already a member."
         }
     }
 }

@@ -1,10 +1,3 @@
-//
-//  GroupsView.swift
-//  Kuppiya
-//
-//  Created by M H T U De Silva on 2026-04-17.
-//
-
 import SwiftUI
 
 struct GroupsView: View {
@@ -12,30 +5,35 @@ struct GroupsView: View {
     @StateObject private var viewModel = GroupsViewModel()
     @State private var selectedGroup: StudyGroup? = nil
     @State private var navigateToGroup = false
+    @State private var showCreateGroup = false      // ← new
 
     var body: some View {
         NavigationStack {
             ZStack {
-                //Color(UIColor.systemGray6).ignoresSafeArea()
-                Color(UIColor.white).ignoresSafeArea()
+                Color.white.ignoresSafeArea()
 
                 VStack(spacing: 0) {
 
                     // MARK: Header
                     VStack(spacing: 0) {
-                        // Title row
                         HStack {
                             Text("My Groups")
-                                .font(.system(size: 22,
-                                              weight: .bold))
+                                .font(.system(size: 22, weight: .bold))
                                 .foregroundColor(.black)
                             Spacer()
+                            // Create Group button
+                            Button {
+                                showCreateGroup = true
+                            } label: {
+                                Image(systemName: "plus.circle.fill")
+                                    .font(.system(size: 26))
+                                    .foregroundColor(Color("PrimaryPurple"))
+                            }
                         }
                         .padding(.horizontal, 20)
                         .padding(.top, 16)
                         .padding(.bottom, 12)
 
-                        // Illustration
                         Image("my_group")
                             .resizable()
                             .scaledToFit()
@@ -43,7 +41,6 @@ struct GroupsView: View {
                             .padding(.bottom, -15)
                             .zIndex(1)
 
-                        // Search
                         KSearchBar(text: $viewModel.searchText)
                             .padding(.horizontal, 20)
                             .padding(.bottom, 16)
@@ -67,6 +64,18 @@ struct GroupsView: View {
                                  : "No groups found")
                                 .font(.system(size: 15))
                                 .foregroundColor(.gray)
+                            // Prompt to create when empty
+                            if viewModel.searchText.isEmpty {
+                                Button {
+                                    showCreateGroup = true
+                                } label: {
+                                    Text("Create your first group")
+                                        .font(.system(size: 14,
+                                                      weight: .semibold))
+                                        .foregroundColor(Color("PrimaryPurple"))
+                                }
+                                .padding(.top, 4)
+                            }
                         }
                         Spacer()
                     } else {
@@ -96,6 +105,13 @@ struct GroupsView: View {
                     GroupDashboardView(group: group)
                         .environmentObject(authVM)
                 }
+            }
+            // ← Create Group sheet
+            .sheet(isPresented: $showCreateGroup) {
+                CreateGroupView { newGroup in
+                    Task { await viewModel.loadMyGroups() }
+                }
+                .environmentObject(authVM)
             }
         }
         .task {

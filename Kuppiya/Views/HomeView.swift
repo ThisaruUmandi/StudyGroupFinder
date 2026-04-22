@@ -115,7 +115,8 @@ struct HomeView: View {
             }
             .navigationBarHidden(true)
             .navigationDestination(isPresented: $navigateToCreate) {
-                Text("Create Group — coming soon")
+                //Text("Create Group — coming soon")
+                CreateGroupView()
                     .environmentObject(authVM)
             }
             .navigationDestination(isPresented: $navigateToBrowse) {
