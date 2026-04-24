@@ -1,6 +1,7 @@
 import Foundation
 import FirebaseFirestore
 import FirebaseAuth
+import FirebaseStorage
 
 class FirestoreService {
     static let shared = FirestoreService()
@@ -16,7 +17,7 @@ class FirestoreService {
             return nil
         }
 
-        print("🔍 UID: \(uid)")
+        print("UID: \(uid)")
 
         let groupSnap = try await db
             .collection("studyGroups")
@@ -91,7 +92,6 @@ class FirestoreService {
         newSession.sessionId = docRef.documentID
         try docRef.setData(from: newSession)
 
-        // Log activity
         guard let uid = Auth.auth().currentUser?.uid else { return }
         try await logActivity(
             groupId: groupId,
@@ -171,7 +171,6 @@ class FirestoreService {
 
         try docRef.setData(from: newGroup)
 
-        // Update joinedGroups for all members
         for memberId in allMembers {
             guard !memberId.isEmpty else {
                 print("Skipping empty memberId")
@@ -184,7 +183,6 @@ class FirestoreService {
                 ])
         }
 
-        // Log activity
         try await logActivity(
             groupId: groupId,
             actorId: uid,
@@ -192,7 +190,7 @@ class FirestoreService {
             type: "member"
         )
 
-        print("✅ Group created: \(groupId)")
+        print("Group created: \(groupId)")
         return newGroup
     }
 
@@ -260,6 +258,84 @@ class FirestoreService {
     }
 
     // -----------------------------------------------
+    // MARK: - Group Settings
+    // -----------------------------------------------
+
+    func updateGroupInfo(
+        groupId: String,
+        name: String,
+        subject: String,
+        description: String
+    ) async throws {
+        try await db.collection("studyGroups")
+            .document(groupId)
+            .updateData([
+                "name"       : name,
+                "subject"    : subject,
+                "description": description
+            ])
+        print("Group info updated")
+    }
+
+    func updateGroupPrivacy(
+        groupId: String,
+        privacy: String
+    ) async throws {
+        try await db.collection("studyGroups")
+            .document(groupId)
+            .updateData(["privacy": privacy])
+        print("Privacy updated: \(privacy)")
+    }
+
+    func removeMemberFromGroup(
+        groupId: String,
+        memberId: String
+    ) async throws {
+        try await db.collection("studyGroups")
+            .document(groupId)
+            .updateData([
+                "members": FieldValue.arrayRemove([memberId])
+            ])
+        try await db.collection("users")
+            .document(memberId)
+            .updateData([
+                "joinedGroups": FieldValue.arrayRemove([groupId])
+            ])
+        print("Member removed: \(memberId)")
+    }
+
+    func transferAdmin(
+        groupId: String,
+        newAdminId: String
+    ) async throws {
+        try await db.collection("studyGroups")
+            .document(groupId)
+            .updateData(["createdBy": newAdminId])
+        print("Admin transferred to: \(newAdminId)")
+    }
+
+    func leaveGroupAsAdmin(groupId: String) async throws {
+        guard let uid = Auth.auth().currentUser?.uid else { return }
+
+        let group = try await fetchGroup(groupId: groupId)
+        guard let group else { return }
+
+        let remaining = group.members.filter { $0 != uid }
+
+        if remaining.isEmpty {
+            try await deleteGroup(groupId: groupId)
+            print("Group deleted — last member left")
+        } else {
+            try await transferAdmin(
+                groupId: groupId,
+                newAdminId: remaining[0]
+            )
+            try await leaveGroup(groupId: groupId)
+            print("Admin transferred to \(remaining[0])")
+        }
+    }
+
+    // -----------------------------------------------
     // MARK: - Join Requests
     // -----------------------------------------------
 
@@ -289,7 +365,10 @@ class FirestoreService {
         }
     }
 
-    func sendJoinRequest(group: StudyGroup, senderName: String) async throws {
+    func sendJoinRequest(
+        group: StudyGroup,
+        senderName: String
+    ) async throws {
         guard let uid = Auth.auth().currentUser?.uid else { return }
 
         let existing = try await db
@@ -326,13 +405,16 @@ class FirestoreService {
 
         try await db.collection("studyGroups")
             .document(request.groupId)
-            .updateData(["members": FieldValue.arrayUnion([request.senderId])])
+            .updateData([
+                "members": FieldValue.arrayUnion([request.senderId])
+            ])
 
         try await db.collection("users")
             .document(request.senderId)
-            .updateData(["joinedGroups": FieldValue.arrayUnion([request.groupId])])
+            .updateData([
+                "joinedGroups": FieldValue.arrayUnion([request.groupId])
+            ])
 
-        // Log activity — member joined
         try await logActivity(
             groupId: request.groupId,
             actorId: request.senderId,
@@ -362,9 +444,10 @@ class FirestoreService {
 
         try await db.collection("users")
             .document(uid)
-            .updateData(["joinedGroups": FieldValue.arrayUnion([group.groupId])])
+            .updateData([
+                "joinedGroups": FieldValue.arrayUnion([group.groupId])
+            ])
 
-        // Log activity
         try await logActivity(
             groupId: group.groupId,
             actorId: uid,
@@ -384,9 +467,10 @@ class FirestoreService {
 
         try await db.collection("users")
             .document(uid)
-            .updateData(["joinedGroups": FieldValue.arrayRemove([groupId])])
+            .updateData([
+                "joinedGroups": FieldValue.arrayRemove([groupId])
+            ])
 
-        // Log activity
         try await logActivity(
             groupId: groupId,
             actorId: uid,
@@ -437,6 +521,95 @@ class FirestoreService {
     }
 
     // -----------------------------------------------
+    // MARK: - Reviews
+    // -----------------------------------------------
+
+    func submitReview(
+        groupId: String,
+        rating: Int,
+        review: String
+    ) async throws {
+        guard let uid = Auth.auth().currentUser?.uid else { return }
+
+        let data: [String: Any] = [
+            "authorId" : uid,
+            "rating"   : rating,
+            "review"   : review,
+            "createdAt": Timestamp(date: Date())
+        ]
+
+        try await db
+            .collection("studyGroups")
+            .document(groupId)
+            .collection("reviews")
+            .addDocument(data: data)
+
+        print("Review submitted for: \(groupId)")
+    }
+    
+    // -----------------------------------------------
+    // MARK: - Storage
+    // -----------------------------------------------
+    
+    func uploadGroupImage(
+        groupId: String,
+        image: UIImage
+    ) async throws -> String {
+        guard let imageData = image.jpegData(compressionQuality: 0.7) else {
+            throw FirestoreError.invalidImage
+        }
+
+        let storageRef = Storage.storage()
+            .reference()
+            .child("groupImages/\(groupId)/avatar.jpg")
+
+        let metadata = StorageMetadata()
+        metadata.contentType = "image/jpeg"
+
+        _ = try await storageRef.putDataAsync(imageData, metadata: metadata)
+        let downloadURL = try await storageRef.downloadURL()
+
+        // Save URL to Firestore
+        try await db.collection("studyGroups")
+            .document(groupId)
+            .updateData([
+                "groupImageURL": downloadURL.absoluteString
+            ])
+
+        print("✅ Group image uploaded: \(downloadURL)")
+        return downloadURL.absoluteString
+    }
+
+    func uploadProfileImage(
+        uid: String,
+        image: UIImage
+    ) async throws -> String {
+        guard let imageData = image.jpegData(compressionQuality: 0.7) else {
+            throw FirestoreError.invalidImage
+        }
+
+        let storageRef = Storage.storage()
+            .reference()
+            .child("profileImages/\(uid)/avatar.jpg")
+
+        let metadata = StorageMetadata()
+        metadata.contentType = "image/jpeg"
+
+        _ = try await storageRef.putDataAsync(imageData, metadata: metadata)
+        let downloadURL = try await storageRef.downloadURL()
+
+        // Save URL to Firestore
+        try await db.collection("users")
+            .document(uid)
+            .updateData([
+                "profileImage": downloadURL.absoluteString
+            ])
+
+        print("✅ Profile image uploaded: \(downloadURL)")
+        return downloadURL.absoluteString
+    }
+
+    // -----------------------------------------------
     // MARK: - Users
     // -----------------------------------------------
 
@@ -477,7 +650,10 @@ class FirestoreService {
         }
     }
 
-} // ← class closes here
+    // Expose db for ViewModel
+    var db_public: Firestore { db }
+
+}
 
 // -----------------------------------------------
 // MARK: - Errors
@@ -487,6 +663,7 @@ enum FirestoreError: LocalizedError {
     case groupNotFound
     case sessionNotFound
     case alreadyMember
+    case invalidImage
 
     var errorDescription: String? {
         switch self {
@@ -494,6 +671,7 @@ enum FirestoreError: LocalizedError {
         case .groupNotFound:   return "Study group not found."
         case .sessionNotFound: return "Session not found."
         case .alreadyMember:   return "Already a member."
+        case .invalidImage:    return "Could not process image."
         }
     }
 }

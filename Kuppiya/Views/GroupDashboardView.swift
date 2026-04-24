@@ -12,12 +12,15 @@ struct GroupDashboardView: View {
     @EnvironmentObject var authVM: AuthViewModel
     @StateObject private var viewModel = GroupDashboardViewModel()
 
-    let group: StudyGroup
+    @State var group: StudyGroup
 
-    @State private var showSettings       = false
+    @State private var showSettings        = false
     @State private var navigateToSessions  = false
     @State private var navigateToChat      = false
     @State private var navigateToResources = false
+    @State private var navigateToQnA       = false
+    @State private var navigateToPolls     = false
+    @State private var navigateToProgress  = false
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -45,38 +48,38 @@ struct GroupDashboardView: View {
             }
 
             // Bottom — mascot + FAB
-            HStack(alignment: .bottom, spacing: 0) {
-                Image("oboy_r")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 90)
-                    .padding(.bottom, 8)
-                    .allowsHitTesting(false)
+//            HStack(alignment: .bottom, spacing: 0) {
+//                Image("oboy_r")
+//                    .resizable()
+//                    .scaledToFit()
+//                    .frame(width: 90)
+//                    .padding(.bottom, 8)
+//                    .allowsHitTesting(false)
+//
+//                Spacer()
 
-                Spacer()
-
-                Button {
-                    navigateToChat = true
-                } label: {
-                    HStack(spacing: 8) {
-                        Image(systemName: "plus.circle.fill")
-                            .font(.system(size: 18))
-                        Text("New Message")
-                            .font(.system(size: 15, weight: .semibold))
-                    }
-                    .foregroundColor(.white)
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 14)
-                    .background(Color(hex: "#1A1ADB"))
-                    .clipShape(Capsule())
-                    .shadow(
-                        color: Color(hex: "#1A1ADB").opacity(0.35),
-                        radius: 10, x: 0, y: 5
-                    )
-                }
-                .padding(.bottom, 24)
-                .padding(.trailing, 20)
-            }
+//                Button {
+//                    navigateToChat = true
+//                } label: {
+//                    HStack(spacing: 8) {
+//                        Image(systemName: "plus.circle.fill")
+//                            .font(.system(size: 18))
+//                        Text("New Message")
+//                            .font(.system(size: 15, weight: .semibold))
+//                    }
+//                    .foregroundColor(.white)
+//                    .padding(.horizontal, 20)
+//                    .padding(.vertical, 14)
+//                    .background(Color(hex: "#1A1ADB"))
+//                    .clipShape(Capsule())
+//                    .shadow(
+//                        color: Color(hex: "#1A1ADB").opacity(0.35),
+//                        radius: 10, x: 0, y: 5
+//                    )
+//                }
+//                .padding(.bottom, 24)
+//                .padding(.trailing, 20)
+            //}
         }
         .navigationBarHidden(true)
         .navigationDestination(isPresented: $navigateToSessions) {
@@ -91,8 +94,27 @@ struct GroupDashboardView: View {
             ResourceView(group: group)
                 .environmentObject(authVM)
         }
+        .navigationDestination(isPresented: $navigateToQnA) {
+            QnAView(group: group)
+                .environmentObject(authVM)
+        }
+        .navigationDestination(isPresented: $navigateToPolls) {
+            PollView(group: group)
+                .environmentObject(authVM)
+        }
+        .navigationDestination(isPresented: $navigateToProgress) {
+            GroupProgressView(group: group)
+                .environmentObject(authVM)
+        }
         .sheet(isPresented: $showSettings) {
             GroupSettingsView(group: group)
+                .environmentObject(authVM)
+        }
+        // ← Refresh group data when settings sheet closes
+        .onChange(of: showSettings) { _, isShowing in
+            if !isShowing {
+                Task { await refreshGroup() }
+            }
         }
         .task {
             await viewModel.loadData(for: group.groupId)
@@ -101,6 +123,14 @@ struct GroupDashboardView: View {
             Button("OK", role: .cancel) {}
         } message: {
             Text(viewModel.errorMessage ?? "")
+        }
+    }
+
+    // MARK: - Refresh group
+    private func refreshGroup() async {
+        if let updated = try? await FirestoreService.shared
+            .fetchGroup(groupId: group.groupId) {
+            group = updated
         }
     }
 
@@ -158,15 +188,36 @@ struct GroupDashboardView: View {
 
     // MARK: - Quick Actions
     private var quickActionsSection: some View {
-        HStack(spacing: 12) {
-            QuickActionCard(imageName: "sessions",  label: "Sessions") {
-                navigateToSessions = true
+        VStack(spacing: 12) {
+            // Row 1
+            HStack(spacing: 12) {
+                QuickActionCard(imageName: "session",
+                                label: "Sessions") {
+                    navigateToSessions = true
+                }
+                QuickActionCard(imageName: "chat",
+                                label: "Chat") {
+                    navigateToChat = true
+                }
+                QuickActionCard(imageName: "resource",
+                                label: "Resources") {
+                    navigateToResources = true
+                }
             }
-            QuickActionCard(imageName: "chat",      label: "Chat") {
-                navigateToChat = true
-            }
-            QuickActionCard(imageName: "resources", label: "Resources") {
-                navigateToResources = true
+            // Row 2
+            HStack(spacing: 12) {
+                QuickActionCard(imageName: "qna",
+                                label: "QnA") {
+                    navigateToQnA = true
+                }
+                QuickActionCard(imageName: "poll",
+                                label: "Polls") {
+                    navigateToPolls = true
+                }
+                QuickActionCard(imageName: "progress",
+                                label: "Progress") {
+                    navigateToProgress = true
+                }
             }
         }
     }
@@ -207,9 +258,17 @@ struct GroupDashboardView: View {
     // MARK: - Recent Activities
     private var recentActivitiesSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Recent Activities")
-                .font(.system(size: 17, weight: .bold))
-                .padding(.horizontal, 20)
+            HStack {
+                Text("Recent Activities")
+                    .font(.system(size: 17, weight: .bold))
+                Spacer()
+                if !viewModel.activities.isEmpty {
+                    Button("See All") { }
+                        .font(.system(size: 13))
+                        .foregroundColor(Color(hex: "#1A1ADB"))
+                }
+            }
+            .padding(.horizontal, 20)
 
             if viewModel.isLoading {
                 ProgressView()

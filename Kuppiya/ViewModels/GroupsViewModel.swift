@@ -71,7 +71,7 @@ class GroupsViewModel: ObservableObject {
     func loadMyGroups() async {
         isLoading = true
         do {
-            // Temporary: test if service is reachable at all
+            // Temporary test if service is reachable at all
             print("Calling fetchMyGroups...")
             myGroups = try await service.fetchMyGroups()
             print("My groups: \(myGroups.count)")
@@ -82,6 +82,11 @@ class GroupsViewModel: ObservableObject {
             showError = true
         }
         isLoading = false
+    }
+    
+    // To refresh after group settings update
+    func refreshGroups() async {
+        await loadMyGroups()
     }
     
 }
