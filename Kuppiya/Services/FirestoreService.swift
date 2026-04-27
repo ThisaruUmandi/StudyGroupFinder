@@ -81,7 +81,10 @@ class FirestoreService {
         }
     }
 
-    func createSession(_ session: StudySession, in groupId: String) async throws {
+    func createSession(
+        _ session: StudySession,
+        in groupId: String
+    ) async throws {
         let docRef = db
             .collection("studyGroups")
             .document(groupId)
@@ -117,7 +120,10 @@ class FirestoreService {
             .updateData(["status": status])
     }
 
-    func deleteSession(sessionId: String, groupId: String) async throws {
+    func deleteSession(
+        sessionId: String,
+        groupId: String
+    ) async throws {
         try await db
             .collection("studyGroups")
             .document(groupId)
@@ -242,7 +248,10 @@ class FirestoreService {
         return try? doc.data(as: StudyGroup.self)
     }
 
-    func updateGroup(groupId: String, data: [String: Any]) async throws {
+    func updateGroup(
+        groupId: String,
+        data: [String: Any]
+    ) async throws {
         try await db
             .collection("studyGroups")
             .document(groupId)
@@ -267,6 +276,8 @@ class FirestoreService {
         subject: String,
         description: String
     ) async throws {
+        guard let uid = Auth.auth().currentUser?.uid else { return }
+
         try await db.collection("studyGroups")
             .document(groupId)
             .updateData([
@@ -274,6 +285,14 @@ class FirestoreService {
                 "subject"    : subject,
                 "description": description
             ])
+
+        try await logActivity(
+            groupId: groupId,
+            actorId: uid,
+            action: "updated group info",
+            type: "update"
+        )
+
         print("Group info updated")
     }
 
@@ -546,16 +565,31 @@ class FirestoreService {
 
         print("Review submitted for: \(groupId)")
     }
-    
+
+    func fetchReviews(for groupId: String) async throws -> [GroupReview] {
+        let snap = try await db
+            .collection("studyGroups")
+            .document(groupId)
+            .collection("reviews")
+            .order(by: "createdAt", descending: true)
+            .getDocuments()
+
+        return snap.documents.compactMap {
+            try? $0.data(as: GroupReview.self)
+        }
+    }
+
     // -----------------------------------------------
     // MARK: - Storage
     // -----------------------------------------------
-    
+
     func uploadGroupImage(
         groupId: String,
         image: UIImage
     ) async throws -> String {
-        guard let imageData = image.jpegData(compressionQuality: 0.7) else {
+        guard let uid = Auth.auth().currentUser?.uid,
+              let imageData = image.jpegData(compressionQuality: 0.7)
+        else {
             throw FirestoreError.invalidImage
         }
 
@@ -566,17 +600,24 @@ class FirestoreService {
         let metadata = StorageMetadata()
         metadata.contentType = "image/jpeg"
 
-        _ = try await storageRef.putDataAsync(imageData, metadata: metadata)
+        _ = try await storageRef.putDataAsync(
+            imageData, metadata: metadata)
         let downloadURL = try await storageRef.downloadURL()
 
-        // Save URL to Firestore
         try await db.collection("studyGroups")
             .document(groupId)
             .updateData([
                 "groupImageURL": downloadURL.absoluteString
             ])
 
-        print("✅ Group image uploaded: \(downloadURL)")
+        try await logActivity(
+            groupId: groupId,
+            actorId: uid,
+            action: "updated group photo",
+            type: "update"
+        )
+
+        print("Group image uploaded: \(downloadURL)")
         return downloadURL.absoluteString
     }
 
@@ -584,7 +625,8 @@ class FirestoreService {
         uid: String,
         image: UIImage
     ) async throws -> String {
-        guard let imageData = image.jpegData(compressionQuality: 0.7) else {
+        guard let imageData = image.jpegData(compressionQuality: 0.7)
+        else {
             throw FirestoreError.invalidImage
         }
 
@@ -595,17 +637,17 @@ class FirestoreService {
         let metadata = StorageMetadata()
         metadata.contentType = "image/jpeg"
 
-        _ = try await storageRef.putDataAsync(imageData, metadata: metadata)
+        _ = try await storageRef.putDataAsync(
+            imageData, metadata: metadata)
         let downloadURL = try await storageRef.downloadURL()
 
-        // Save URL to Firestore
         try await db.collection("users")
             .document(uid)
             .updateData([
                 "profileImage": downloadURL.absoluteString
             ])
 
-        print("✅ Profile image uploaded: \(downloadURL)")
+        print("Profile image uploaded: \(downloadURL)")
         return downloadURL.absoluteString
     }
 
@@ -624,6 +666,10 @@ class FirestoreService {
     }
 
     func fetchUser(uid: String) async throws -> AppUser? {
+        guard !uid.isEmpty else {
+            print("⚠️ fetchUser called with empty uid")
+            return nil
+        }
         let doc = try await db
             .collection("users")
             .document(uid)
@@ -648,6 +694,103 @@ class FirestoreService {
         return snap.documents.compactMap {
             try? $0.data(as: AppUser.self)
         }
+    }
+
+    // -----------------------------------------------
+    // MARK: - Interests
+    // -----------------------------------------------
+
+    func saveInterests(
+        uid: String,
+        interests: [String]
+    ) async throws {
+        try await db.collection("users")
+            .document(uid)
+            .updateData(["interests": interests])
+        print("✅ Interests saved: \(interests)")
+    }
+
+    func hasInterests(uid: String) async throws -> Bool {
+        let user = try await fetchUser(uid: uid)
+        let interests = user?.interests ?? []
+        return !interests.filter { !$0.isEmpty }.isEmpty
+    }
+
+    // -----------------------------------------------
+    // MARK: - Discovery
+    // -----------------------------------------------
+
+    func fetchAllGroupsForDiscovery() async throws -> [StudyGroup] {
+        let snap = try await db.collection("studyGroups").getDocuments()
+        return snap.documents.compactMap { doc -> StudyGroup? in
+            do {
+                return try doc.data(as: StudyGroup.self)
+            } catch {
+                print("decode failed \(doc.documentID): \(error)")
+                return nil
+            }
+        }
+    }
+
+    func fetchScoredRecommendedGroups(user: AppUser) async throws -> [StudyGroup] {
+        let all = try await fetchAllGroupsForDiscovery()
+        let notJoined = all.filter { !$0.members.contains(user.uid) }
+        let interests = user.interests.filter { !$0.isEmpty && $0 != "skipped" }
+
+        let scored: [(StudyGroup, Int)] = notJoined.map { group in
+            var score = 0
+            if !user.major.isEmpty, group.major.lowercased() == user.major.lowercased() { score += 10 }
+            if !interests.isEmpty, interests.contains(where: {
+                group.subject.lowercased().contains($0.lowercased()) ||
+                group.name.lowercased().contains($0.lowercased())
+            }) { score += 5 }
+            if !user.university.isEmpty, group.university.lowercased() == user.university.lowercased() { score += 3 }
+            return (group, score)
+        }
+
+        let results = scored.filter { $0.1 > 0 }.sorted { $0.1 > $1.1 }.map { $0.0 }
+        return results.isEmpty ? notJoined : results
+    }
+
+    func fetchTrendingGroupsCombined(currentUserUid: String) async throws -> [StudyGroup] {
+        let all = try await fetchAllGroupsForDiscovery()
+        let sevenDaysAgo = Date().addingTimeInterval(-7 * 24 * 60 * 60)
+        var scored: [(StudyGroup, Double)] = []
+
+        for group in all {
+            guard let groupId = group.id else { continue }
+            let activitySnap = try await db
+                .collection("studyGroups").document(groupId)
+                .collection("activities")
+                .whereField("createdAt", isGreaterThan: Timestamp(date: sevenDaysAgo))
+                .getDocuments()
+            let score = Double(group.members.count) * 0.6 + Double(activitySnap.documents.count) * 0.4
+            scored.append((group, score))
+        }
+
+        return scored.sorted { $0.1 > $1.1 }.prefix(10).map { $0.0 }
+    }
+
+    func searchAllGroups(query: String) async throws -> [StudyGroup] {
+        guard !query.isEmpty else { return [] }
+        let all = try await fetchAllGroupsForDiscovery()
+        let q = query.lowercased()
+        return all.filter {
+            $0.name.lowercased().contains(q) ||
+            $0.subject.lowercased().contains(q) ||
+            $0.major.lowercased().contains(q) ||
+            $0.university.lowercased().contains(q)
+        }
+    }
+
+    func checkPendingRequest(groupId: String) async throws -> Bool {
+        guard let uid = Auth.auth().currentUser?.uid else { return false }
+        let snap = try await db.collection("joinRequests")
+            .whereField("groupId", isEqualTo: groupId)
+            .whereField("senderId", isEqualTo: uid)
+            .whereField("status", isEqualTo: "pending")
+            .getDocuments()
+        return !snap.documents.isEmpty
     }
 
     // Expose db for ViewModel

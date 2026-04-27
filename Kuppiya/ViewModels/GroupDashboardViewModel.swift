@@ -20,7 +20,7 @@ class GroupDashboardViewModel: ObservableObject {
     private let service = FirestoreService.shared
 
     func loadData(for groupId: String) async {
-        isLoading = true
+        //isLoading = true
         do {
             async let sessions   = service.fetchSessions(for: groupId)
             async let activities = service.fetchActivities(for: groupId)
@@ -34,7 +34,7 @@ class GroupDashboardViewModel: ObservableObject {
         } catch {
             errorMessage = error.localizedDescription
             showError = true
-            print("❌ Dashboard error: \(error)")
+            print("Dashboard error: \(error)")
         }
         isLoading = false
     }

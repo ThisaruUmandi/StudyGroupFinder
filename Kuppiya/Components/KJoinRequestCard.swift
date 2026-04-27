@@ -15,8 +15,8 @@ struct KJoinRequestCard: View {
     var body: some View {
         HStack(spacing: 12) {
 
-            // Initials avatar
-            KInitialsAvatar(
+            // User avatar
+            KUserAvatar(
                 name: request.senderName,
                 size: 42
             )

@@ -8,7 +8,7 @@
 import Foundation
 import FirebaseFirestore
 
-struct StudyGroup: Codable, Identifiable, Equatable {
+struct StudyGroup: Codable, Identifiable, Equatable, Hashable {
     @DocumentID var id: String?
     var groupId: String
     var name: String
@@ -19,7 +19,7 @@ struct StudyGroup: Codable, Identifiable, Equatable {
     var members: [String]
     var privacy: String
     var university: String
-    var createdAt: Date
+    var createdAt: Date?
     var inviteLink: String?
     var groupImageURL: String?
 

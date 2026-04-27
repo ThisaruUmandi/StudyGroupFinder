@@ -266,4 +266,13 @@ class AuthViewModel: ObservableObject {
         errorMessage = message
         showError    = true
     }
+    
+    // ─────────────────────────────────────
+    // MARK: - Refresh after Save
+    // ─────────────────────────────────────
+    func refreshUser() async {
+        guard let uid = Auth.auth().currentUser?.uid else { return }
+        currentUser = try? await FirestoreService.shared.fetchUser(uid: uid)
+    }
+    
 }

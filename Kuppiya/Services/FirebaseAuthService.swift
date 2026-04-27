@@ -47,6 +47,7 @@ class FirebaseAuthService {
             university: "",
             major: "",
             joinedGroups: [],
+            interests: [],
             createdAt: Date(),
             fcmToken: ""
         )
@@ -129,6 +130,7 @@ class FirebaseAuthService {
                 university: "",
                 major: "",
                 joinedGroups: [],
+                interests: [],
                 createdAt: Date(),
                 fcmToken: ""
             )

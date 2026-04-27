@@ -91,7 +91,7 @@ struct KUserAvatar: View {
             size: 60
         )
 
-        // No image → shows letter
+        // No image - shows letter
         KUserAvatar(name: "Kaveen", size: 60)
         KUserAvatar(name: "Jordan", size: 60)
         KUserAvatar(name: "Emma", size: 60)
