@@ -9,7 +9,7 @@ import Foundation
 import FirebaseFirestore
 import CoreLocation
 
-struct StudySession: Codable, Identifiable {
+struct StudySession: Codable, Identifiable, Hashable {
     @DocumentID var id: String?
     var sessionId: String
     var groupId: String
@@ -28,7 +28,15 @@ struct StudySession: Codable, Identifiable {
     var createdByName: String
     var attendees: [String]
 
-    // MARK: - Computed
+    // Custom Hashable — avoids CLLocationCoordinate2D hashing issue
+    static func == (lhs: StudySession, rhs: StudySession) -> Bool {
+        lhs.sessionId == rhs.sessionId
+    }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(sessionId)
+    }
+
     var isOnline: Bool    { type == "online" }
     var isPhysical: Bool  { type == "physical" }
     var isUpcoming: Bool  { status == "upcoming" }
