@@ -13,40 +13,58 @@ import Combine
 @MainActor
 class HomeViewModel: ObservableObject {
 
+    @Published var ongoingSession: StudySession?
     @Published var upcomingSession: StudySession?
+    @Published var allUpcomingSessions: [StudySession] = []
     @Published var joinRequests: [JoinRequest] = []
-    @Published var isLoading: Bool             = false
+    @Published var isLoading                   = false
     @Published var errorMessage: String?
-    @Published var showError: Bool             = false
-    @Published var searchText: String          = ""
+    @Published var showError                   = false
+    @Published var searchText                  = ""
 
     private let firestoreService = FirestoreService.shared
 
     var pendingCount: Int { joinRequests.count }
 
-    // MARK: - Load home data
     func loadHomeData() async {
         isLoading = true
         do {
-            async let session  = firestoreService
-                .fetchUpcomingSession()
-            async let requests = firestoreService
-                .fetchPendingJoinRequests()
+            async let requests = firestoreService.fetchPendingJoinRequests()
 
-            upcomingSession = try await session
-            joinRequests    = try await requests
+            // fetch all sessions across groups
+            let allSessions = try await firestoreService.fetchAllUpcomingSessions()
+            let now         = Date()
 
-            print("Session loaded: \(upcomingSession?.title ?? "none")")
-            print("✅ Requests loaded: \(joinRequests.count)")
+            // ongoing — started within last 2 hours
+            ongoingSession = allSessions.first {
+                let end = $0.date.addingTimeInterval(2 * 60 * 60)
+                return now >= $0.date && now <= end
+            }
+
+            // upcoming — next future session
+            upcomingSession = allSessions
+                .filter { $0.date > now }
+                .sorted { $0.date < $1.date }
+                .first
+            
+            // all upcoming sessions sorted by date
+            allUpcomingSessions = allSessions
+                .filter { $0.date > now }
+                .sorted { $0.date < $1.date }
+
+            joinRequests = try await requests
+
+            print("Ongoing: \(ongoingSession?.title ?? "none")")
+            print("Upcoming: \(upcomingSession?.title ?? "none")")
+            print("Requests: \(joinRequests.count)")
         } catch {
             errorMessage = error.localizedDescription
             showError    = true
-            print("HomeViewModel error: \(error)")
         }
+        
         isLoading = false
     }
 
-    // MARK: - Approve request
     func approveRequest(_ request: JoinRequest) async {
         do {
             try await firestoreService.approveJoinRequest(request)
@@ -57,7 +75,6 @@ class HomeViewModel: ObservableObject {
         }
     }
 
-    // MARK: - Reject request
     func rejectRequest(_ request: JoinRequest) async {
         do {
             try await firestoreService.rejectJoinRequest(request)

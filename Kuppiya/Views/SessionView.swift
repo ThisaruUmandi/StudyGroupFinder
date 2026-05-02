@@ -26,11 +26,15 @@ struct SessionView: View {
                 VStack(alignment: .leading, spacing: 0) {
                     header
 
-                    // Ongoing session — shows in purple KSessionCard
-                    if let ongoing = viewModel.todaySession {
-                        KSessionCard(session: ongoing) { }
-                            .padding(.horizontal, 20)
-                            .padding(.top, 20)
+                    if let ongoing = viewModel.ongoingSession {
+                        KSessionCard(session: ongoing) {
+                            if let url = URL(string: ongoing.joinLink),
+                               !ongoing.joinLink.isEmpty {
+                                UIApplication.shared.open(url)
+                            }
+                        }
+                        .padding(.horizontal, 20)
+                        .padding(.top, 20)
                     }
 
                     segmentAndFilter
@@ -44,7 +48,6 @@ struct SessionView: View {
                 .padding(.top, 16)
             }
 
-            // Any member can create a session
             Button { showCreateSheet = true } label: {
                 Image(systemName: "plus")
                     .font(.system(size: 20, weight: .semibold))
@@ -60,10 +63,13 @@ struct SessionView: View {
         }
         .navigationBarHidden(true)
         .navigationDestination(item: $selectedSession) { session in
-            SessionDetailView(session: session)
+            SessionDetailView(session: session, group: group).environmentObject(authVM)
         }
         .navigationDestination(isPresented: $showCreateSheet) {
             CreateSessionView(group: group).environmentObject(authVM)
+        }
+        .onChange(of: showCreateSheet) { _, isShowing in
+            if !isShowing { Task { await viewModel.load(for: group.groupId) } }
         }
         .task { await viewModel.load(for: group.groupId) }
         .alert("Error", isPresented: $viewModel.showError) {
@@ -88,19 +94,19 @@ struct SessionView: View {
             Text("Sessions")
                 .font(.system(size: 17, weight: .semibold))
             Spacer()
-//            Image("oboy_r")
-//                .resizable()
-//                .scaledToFit()
-//                .frame(width: 54)
-//                .offset(y: -6)
+            Image("oboy_r")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 54)
+                .offset(y: -6)
         }
         .padding(.horizontal, 20)
     }
 
     private var segmentAndFilter: some View {
-        HStack() {
+        HStack(spacing: 12) {
             KSegmentControl(
-                options: ["Upcoming", "Past Sessions"],
+                options: ["Upcoming", "Completed"],
                 selected: Binding(
                     get: { viewModel.showingPastSessions ? 1 : 0 },
                     set: { viewModel.showingPastSessions = $0 == 1 }
@@ -162,7 +168,7 @@ struct SessionView: View {
                             .font(.system(size: 32))
                             .foregroundColor(.gray.opacity(0.35))
                         Text(viewModel.showingPastSessions
-                             ? "No past sessions" : "No upcoming sessions")
+                             ? "No completed sessions" : "No upcoming sessions")
                             .font(.system(size: 14))
                             .foregroundColor(.secondary)
                     }
@@ -172,7 +178,7 @@ struct SessionView: View {
             } else {
                 VStack(spacing: 12) {
                     ForEach(viewModel.displayedSessions) { session in
-                        SessionListCard(session: session) {
+                        SessionListCard(session: session, group: group) {
                             selectedSession = session
                         }
                         .padding(.horizontal, 20)
@@ -180,97 +186,6 @@ struct SessionView: View {
                 }
             }
         }
-    }
-}
-
-// MARK: - Session list card
-
-private struct SessionListCard: View {
-    let session: StudySession
-    let onTap: () -> Void
-
-    private var cardBg: Color {
-        session.isOnline ? Color(hex: "#FFF8E8") : Color(hex: "#E8F5EE")
-    }
-
-    private var tagColor: Color {
-        session.isOnline ? Color(hex: "#BA7517") : Color(hex: "#1D9E75")
-    }
-
-    var body: some View {
-        HStack(alignment: .center, spacing: 12) {
-            VStack(alignment: .leading, spacing: 8) {
-                Text(session.isOnline ? "ONLINE" : "PHYSICAL")
-                    .font(.system(size: 10, weight: .bold))
-                    .foregroundColor(tagColor)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 3)
-                    .background(tagColor.opacity(0.12))
-                    .cornerRadius(4)
-
-                Text(session.title)
-                    .font(.system(size: 16, weight: .bold))
-                    .foregroundColor(.primary)
-
-                HStack(spacing: 10) {
-                    Label {
-                        Text(shortDate(session.date))
-                            .font(.system(size: 12))
-                            .foregroundColor(.secondary)
-                    } icon: {
-                        Image(systemName: "calendar")
-                            .font(.system(size: 11))
-                            .foregroundColor(.secondary)
-                    }
-
-                    Label {
-                        Text(session.startTime)
-                            .font(.system(size: 12))
-                            .foregroundColor(.secondary)
-                    } icon: {
-                        Image(systemName: "clock")
-                            .font(.system(size: 11))
-                            .foregroundColor(.secondary)
-                    }
-
-                    if session.isPhysical && !session.location.isEmpty {
-                        Label {
-                            Text(session.location)
-                                .font(.system(size: 12))
-                                .foregroundColor(.secondary)
-                                .lineLimit(1)
-                        } icon: {
-                            Image(systemName: "mappin")
-                                .font(.system(size: 11))
-                                .foregroundColor(.secondary)
-                        }
-                    }
-                }
-            }
-
-            Spacer()
-
-            Button(action: onTap) {
-                ZStack {
-                    Circle()
-                        .fill(Color(.systemGray5))
-                        .frame(width: 36, height: 36)
-                    Image(systemName: "arrow.up.right")
-                        .font(.system(size: 13, weight: .semibold))
-                        .foregroundColor(.primary)
-                }
-            }
-        }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 14)
-        .background(cardBg)
-        .cornerRadius(16)
-    }
-
-    private func shortDate(_ date: Date) -> String {
-        let f = DateFormatter()
-        f.dateFormat = "MMM d"
-        return f.string(from: date)
     }
 }
 

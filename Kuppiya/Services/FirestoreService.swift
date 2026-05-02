@@ -10,6 +10,42 @@ class FirestoreService {
     // -----------------------------------------------
     // MARK: - Sessions
     // -----------------------------------------------
+    
+    func fetchAllUpcomingSessions() async throws -> [StudySession] {
+        guard let uid = Auth.auth().currentUser?.uid else { return [] }
+
+        let groupSnap = try await db
+            .collection("studyGroups")
+            .whereField("members", arrayContains: uid)
+            .getDocuments()
+
+        var all: [StudySession] = []
+        let now = Date()
+
+        for doc in groupSnap.documents {
+            let groupId = doc.documentID
+            let snap    = try await db
+                .collection("studyGroups")
+                .document(groupId)
+                .collection("sessions")
+                .getDocuments()
+
+            let sessions = snap.documents.compactMap {
+                try? $0.data(as: StudySession.self)
+            }
+            .filter {
+                // include ongoing and upcoming, exclude completed
+                let end       = $0.date.addingTimeInterval(2 * 60 * 60)
+                let isOngoing = now >= $0.date && now <= end
+                let isFuture  = $0.date > now
+                return isOngoing || isFuture
+            }
+
+            all.append(contentsOf: sessions)
+        }
+
+        return all.sorted { $0.date < $1.date }
+    }
 
     func fetchUpcomingSession() async throws -> StudySession? {
         guard let uid = Auth.auth().currentUser?.uid else {
@@ -25,13 +61,9 @@ class FirestoreService {
             .getDocuments()
 
         print("Groups found: \(groupSnap.documents.count)")
+        guard !groupSnap.documents.isEmpty else { return nil }
 
-        guard !groupSnap.documents.isEmpty else {
-            print("UID not in any group members[]")
-            return nil
-        }
-
-        var upcoming: [StudySession] = []
+        var candidates: [StudySession] = []
 
         for doc in groupSnap.documents {
             let groupId = doc.documentID
@@ -45,6 +77,7 @@ class FirestoreService {
 
             print("Total sessions: \(allSnap.documents.count)")
 
+            let now = Date()
             let sessions = allSnap.documents
                 .compactMap { d -> StudySession? in
                     do {
@@ -55,15 +88,25 @@ class FirestoreService {
                     }
                 }
                 .filter {
-                    $0.status == "upcoming" &&
-                    $0.date > Date()
+                    let end        = $0.date.addingTimeInterval(2 * 60 * 60)
+                    let isOngoing  = now >= $0.date && now <= end
+                    let isUpcoming = $0.date > now
+                    return isOngoing || isUpcoming
                 }
 
             print("Upcoming filtered: \(sessions.count)")
-            upcoming.append(contentsOf: sessions)
+            candidates.append(contentsOf: sessions)
         }
 
-        let result = upcoming.sorted { $0.date < $1.date }.first
+        // ongoing sessions show first, then sort by nearest date
+        let now = Date()
+        let result = candidates.sorted { a, b in
+            let aOngoing = now >= a.date && now <= a.date.addingTimeInterval(7200)
+            let bOngoing = now >= b.date && now <= b.date.addingTimeInterval(7200)
+            if aOngoing != bOngoing { return aOngoing }
+            return a.date < b.date
+        }.first
+
         print("Session: \(result?.title ?? "none")")
         return result
     }
@@ -131,6 +174,37 @@ class FirestoreService {
             .document(sessionId)
             .delete()
         print("Session deleted: \(sessionId)")
+    }
+    
+    func markAttendance(sessionId: String, groupId: String) async throws {
+        guard let uid = Auth.auth().currentUser?.uid else { return }
+        guard !sessionId.isEmpty, !groupId.isEmpty else {
+            print("markAttendance: sessionId or groupId is empty")
+            return
+        }
+        try await db
+            .collection("studyGroups")
+            .document(groupId)
+            .collection("sessions")
+            .document(sessionId)
+            .updateData(["attendees": FieldValue.arrayUnion([uid])])
+    }
+    
+    func updateSessionInfo(
+        sessionId: String,
+        groupId: String,
+        title: String,
+        description: String
+    ) async throws {
+        try await db
+            .collection("studyGroups")
+            .document(groupId)
+            .collection("sessions")
+            .document(sessionId)
+            .updateData([
+                "title":       title,
+                "description": description
+            ])
     }
 
     // -----------------------------------------------

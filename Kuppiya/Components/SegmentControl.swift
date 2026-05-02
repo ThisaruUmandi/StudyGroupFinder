@@ -20,6 +20,7 @@ struct KSegmentControl: View {
                     Text(options[i])
                         .font(.system(size: 13, weight: selected == i ? .semibold : .semibold))
                         .foregroundColor(selected == i ? .white : .secondary)
+                        .frame(maxWidth: .infinity) 
                         .padding(.horizontal, 35)
                         .padding(.vertical, 10)
                         .background(selected == i ? Color(hex: "#0300BF") : Color.clear)

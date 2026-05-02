@@ -15,16 +15,25 @@ struct HomeView: View {
     @State private var navigateToCreate    = false
     @State private var navigateToDiscover  = false
     @State private var navigateToInterests = false
+    @State private var showAllSessions     = false
 
     var body: some View {
         NavigationStack {
-            ZStack {
+            ZStack(alignment: .top) {
                 Color.white.ignoresSafeArea()
 
-                if viewModel.isLoading {
-                    ProgressView()
-                } else {
-                    scrollContent
+                VStack(spacing: 0) {
+                    // Fixed header — does not scroll
+                    HomeHeaderView(user: authVM.currentUser)
+                        .background(Color.white)
+
+                    if viewModel.isLoading {
+                        Spacer()
+                        ProgressView()
+                        Spacer()
+                    } else {
+                        scrollContent
+                    }
                 }
             }
             .navigationBarHidden(true)
@@ -52,14 +61,12 @@ struct HomeView: View {
         }
     }
 
-    // Pulled out so body stays readable
     private var scrollContent: some View {
         ScrollView(showsIndicators: false) {
             VStack(alignment: .leading, spacing: 20) {
-                HomeHeaderView(user: authVM.currentUser)
-
                 HomeGreetingView()
                     .padding(.horizontal, 20)
+                    .padding(.top, 16)
 
                 KSearchBar(text: $viewModel.searchText)
                     .padding(.horizontal, 20)
@@ -87,16 +94,56 @@ struct HomeView: View {
                 .padding(.horizontal, 20)
                 .padding(.bottom, 20)
 
-                VStack(alignment: .leading, spacing: 12) {
-                    HomeSectionHeader(title: "Upcoming Sessions")
+                // Ongoing session — only shows when a session is happening right now
+                if let ongoing = viewModel.ongoingSession {
+                    VStack(alignment: .leading, spacing: 12) {
+                        HomeSectionHeader(title: "Ongoing Session")
+                            .padding(.horizontal, 20)
+                        KSessionCard(session: ongoing) {
+                            if let url = URL(string: ongoing.joinLink),
+                               !ongoing.joinLink.isEmpty {
+                                UIApplication.shared.open(url)
+                            }
+                        }
                         .padding(.horizontal, 20)
+                    }
+                }
 
-                    if let session = viewModel.upcomingSession {
-                        KSessionCard(session: session)
-                            .padding(.horizontal, 20)
+                // Upcoming sessions — shows one, expands to all on See All tap
+                VStack(alignment: .leading, spacing: 12) {
+                    HomeSectionHeader(
+                        title: "Upcoming Sessions",
+                        actionTitle: showAllSessions ? "Show Less" : "See All",
+                        onAction: {
+                            withAnimation(.easeInOut(duration: 0.25)) {
+                                showAllSessions.toggle()
+                            }
+                        }
+                    )
+                    .padding(.horizontal, 20)
+
+                    if showAllSessions {
+                        // Show all upcoming sessions across all groups
+                        if viewModel.allUpcomingSessions.isEmpty {
+                            KEmptySessionCard()
+                                .padding(.horizontal, 20)
+                        } else {
+                            VStack(spacing: 12) {
+                                ForEach(viewModel.allUpcomingSessions) { session in
+                                    KSessionCard(session: session)
+                                        .padding(.horizontal, 20)
+                                }
+                            }
+                        }
                     } else {
-                        KEmptySessionCard()
-                            .padding(.horizontal, 20)
+                        // Show only the nearest upcoming session
+                        if let session = viewModel.upcomingSession {
+                            KSessionCard(session: session)
+                                .padding(.horizontal, 20)
+                        } else {
+                            KEmptySessionCard()
+                                .padding(.horizontal, 20)
+                        }
                     }
                 }
 
@@ -125,7 +172,6 @@ struct HomeView: View {
 
                 Spacer(minLength: 80)
             }
-            .padding(.top, 16)
         }
     }
 
@@ -171,6 +217,7 @@ struct HomeHeaderView: View {
         }
         .padding(.horizontal, 20)
         .padding(.top, 8)
+        .padding(.bottom, 8)
     }
 }
 

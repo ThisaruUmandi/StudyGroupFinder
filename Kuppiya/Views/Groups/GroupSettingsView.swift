@@ -7,7 +7,7 @@ struct GroupSettingsView: View {
 
     let group: StudyGroup
 
-    @State private var memberToRemove: AppUser? = nil  // ← add this
+    @State private var memberToRemove: AppUser? = nil
 
     private var isAdmin: Bool {
         group.createdBy == authVM.currentUser?.uid
@@ -519,83 +519,6 @@ struct GroupSettingsView: View {
             )
         }
         .padding(.horizontal, 20)
-    }
-}
-
-// MARK: - Settings Form Field
-private struct SettingsFormField: View {
-    let icon: String
-    let iconColor: Color
-    let iconBg: Color
-    let label: String
-    @Binding var text: String
-    var isMultiline: Bool = false
-
-    var body: some View {
-        HStack(alignment: isMultiline ? .top : .center, spacing: 14) {
-            KIconBox(
-                icon: icon, iconColor: iconColor, bgColor: iconBg,
-                size: 42, cornerRadius: 12, iconSize: 17
-            )
-            .padding(.top, isMultiline ? 4 : 0)
-
-            VStack(alignment: .leading, spacing: 3) {
-                Text(label)
-                    .font(.system(size: 10, weight: .semibold))
-                    .foregroundColor(.secondary)
-                    .tracking(0.5)
-
-                if isMultiline {
-                    ZStack(alignment: .topLeading) {
-                        if text.isEmpty {
-                            Text("Enter description...")
-                                .font(.system(size: 14))
-                                .foregroundColor(Color(.placeholderText))
-                        }
-                        TextEditor(text: $text)
-                            .frame(minHeight: 60)
-                            .font(.system(size: 14))
-                            .scrollContentBackground(.hidden)
-                            .padding(.leading, -4)
-                    }
-                } else {
-                    TextField("", text: $text)
-                        .font(.system(size: 14))
-                }
-            }
-        }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 14)
-    }
-}
-
-// MARK: - Settings Read Only Field
-private struct SettingsReadOnlyField: View {
-    let icon: String
-    let iconColor: Color
-    let iconBg: Color
-    let label: String
-    let value: String
-
-    var body: some View {
-        HStack(spacing: 14) {
-            KIconBox(
-                icon: icon, iconColor: iconColor, bgColor: iconBg,
-                size: 42, cornerRadius: 12, iconSize: 17
-            )
-            VStack(alignment: .leading, spacing: 3) {
-                Text(label)
-                    .font(.system(size: 10, weight: .semibold))
-                    .foregroundColor(.secondary)
-                    .tracking(0.5)
-                Text(value)
-                    .font(.system(size: 14))
-                    .foregroundColor(.primary)
-            }
-            Spacer()
-        }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 14)
     }
 }
 

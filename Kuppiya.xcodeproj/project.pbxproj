@@ -61,7 +61,7 @@
 		339FECC52FA2313F00D29D8E /* Exceptions for "Kuppiya" folder in "Kuppiya" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				Resources/Info.plist,
+				Info.plist,
 			);
 			target = 3319DB092F7CB886000A3BD3 /* Kuppiya */;
 		};

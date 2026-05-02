@@ -93,7 +93,6 @@ struct OnboardingView: View {
                 .padding(.bottom, 48)
             }
         }
-        // ← KEY FIX: watch navigateToSetup and change screen
         .onChange(of: viewModel.navigateToSetup) { navigate in
             if navigate {
                 currentScreen = .signup
