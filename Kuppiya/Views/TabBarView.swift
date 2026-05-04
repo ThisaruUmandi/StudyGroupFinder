@@ -28,8 +28,8 @@ struct TabBarView: View {
                             .toolbarVisibility(.hidden, for: .tabBar)
                     }
                     Tab(value: .activity) {
-                        Text("Activity")
-                        //ActivityView()
+                        //Text("Activity")
+                        ActivityView()
                             .toolbarVisibility(.hidden, for: .tabBar)
                     }
                     Tab(value: .profile) {

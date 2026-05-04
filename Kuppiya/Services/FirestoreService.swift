@@ -10,7 +10,7 @@ class FirestoreService {
     // -----------------------------------------------
     // MARK: - Sessions
     // -----------------------------------------------
-    
+
     func fetchAllUpcomingSessions() async throws -> [StudySession] {
         guard let uid = Auth.auth().currentUser?.uid else { return [] }
 
@@ -34,7 +34,6 @@ class FirestoreService {
                 try? $0.data(as: StudySession.self)
             }
             .filter {
-                // include ongoing and upcoming, exclude completed
                 let end       = $0.date.addingTimeInterval(2 * 60 * 60)
                 let isOngoing = now >= $0.date && now <= end
                 let isFuture  = $0.date > now
@@ -53,29 +52,22 @@ class FirestoreService {
             return nil
         }
 
-        print("UID: \(uid)")
-
         let groupSnap = try await db
             .collection("studyGroups")
             .whereField("members", arrayContains: uid)
             .getDocuments()
 
-        print("Groups found: \(groupSnap.documents.count)")
         guard !groupSnap.documents.isEmpty else { return nil }
 
         var candidates: [StudySession] = []
 
         for doc in groupSnap.documents {
             let groupId = doc.documentID
-            print("Group: \(groupId)")
-
             let allSnap = try await db
                 .collection("studyGroups")
                 .document(groupId)
                 .collection("sessions")
                 .getDocuments()
-
-            print("Total sessions: \(allSnap.documents.count)")
 
             let now = Date()
             let sessions = allSnap.documents
@@ -94,21 +86,16 @@ class FirestoreService {
                     return isOngoing || isUpcoming
                 }
 
-            print("Upcoming filtered: \(sessions.count)")
             candidates.append(contentsOf: sessions)
         }
 
-        // ongoing sessions show first, then sort by nearest date
         let now = Date()
-        let result = candidates.sorted { a, b in
+        return candidates.sorted { a, b in
             let aOngoing = now >= a.date && now <= a.date.addingTimeInterval(7200)
             let bOngoing = now >= b.date && now <= b.date.addingTimeInterval(7200)
             if aOngoing != bOngoing { return aOngoing }
             return a.date < b.date
         }.first
-
-        print("Session: \(result?.title ?? "none")")
-        return result
     }
 
     func fetchSessions(for groupId: String) async throws -> [StudySession] {
@@ -124,10 +111,7 @@ class FirestoreService {
         }
     }
 
-    func createSession(
-        _ session: StudySession,
-        in groupId: String
-    ) async throws {
+    func createSession(_ session: StudySession, in groupId: String) async throws {
         let docRef = db
             .collection("studyGroups")
             .document(groupId)
@@ -150,11 +134,7 @@ class FirestoreService {
         print("Session created: \(docRef.documentID)")
     }
 
-    func updateSessionStatus(
-        sessionId: String,
-        groupId: String,
-        status: String
-    ) async throws {
+    func updateSessionStatus(sessionId: String, groupId: String, status: String) async throws {
         try await db
             .collection("studyGroups")
             .document(groupId)
@@ -163,10 +143,19 @@ class FirestoreService {
             .updateData(["status": status])
     }
 
-    func deleteSession(
-        sessionId: String,
-        groupId: String
-    ) async throws {
+    func updateSessionInfo(sessionId: String, groupId: String, title: String, description: String) async throws {
+        try await db
+            .collection("studyGroups")
+            .document(groupId)
+            .collection("sessions")
+            .document(sessionId)
+            .updateData([
+                "title":       title,
+                "description": description
+            ])
+    }
+
+    func deleteSession(sessionId: String, groupId: String) async throws {
         try await db
             .collection("studyGroups")
             .document(groupId)
@@ -175,7 +164,7 @@ class FirestoreService {
             .delete()
         print("Session deleted: \(sessionId)")
     }
-    
+
     func markAttendance(sessionId: String, groupId: String) async throws {
         guard let uid = Auth.auth().currentUser?.uid else { return }
         guard !sessionId.isEmpty, !groupId.isEmpty else {
@@ -189,22 +178,67 @@ class FirestoreService {
             .document(sessionId)
             .updateData(["attendees": FieldValue.arrayUnion([uid])])
     }
-    
-    func updateSessionInfo(
-        sessionId: String,
-        groupId: String,
-        title: String,
-        description: String
-    ) async throws {
+
+    // -----------------------------------------------
+    // MARK: - Resources
+    // -----------------------------------------------
+
+    func fetchResources(for groupId: String) async throws -> [Resource] {
+        let snap = try await db
+            .collection("studyGroups")
+            .document(groupId)
+            .collection("resources")
+            .order(by: "createdAt", descending: true)
+            .getDocuments()
+        return snap.documents.compactMap {
+            try? $0.data(as: Resource.self)
+        }
+    }
+
+    func createResource(_ resource: Resource, in groupId: String) async throws {
+        let ref = db
+            .collection("studyGroups")
+            .document(groupId)
+            .collection("resources")
+            .document(resource.resourceId)
+        try ref.setData(from: resource)
+        print("Resource created: \(resource.resourceId)")
+    }
+
+    func toggleLike(resourceId: String, groupId: String, uid: String, isLiked: Bool) async throws {
+        let ref = db
+            .collection("studyGroups")
+            .document(groupId)
+            .collection("resources")
+            .document(resourceId)
+        if isLiked {
+            try await ref.updateData(["likedBy": FieldValue.arrayRemove([uid])])
+        } else {
+            try await ref.updateData(["likedBy": FieldValue.arrayUnion([uid])])
+        }
+    }
+
+    func toggleSave(resourceId: String, groupId: String, uid: String, isSaved: Bool) async throws {
+        let ref = db
+            .collection("studyGroups")
+            .document(groupId)
+            .collection("resources")
+            .document(resourceId)
+        if isSaved {
+            try await ref.updateData(["savedBy": FieldValue.arrayRemove([uid])])
+        } else {
+            try await ref.updateData(["savedBy": FieldValue.arrayUnion([uid])])
+        }
+    }
+
+    func deleteResource(resourceId: String, groupId: String) async throws {
         try await db
             .collection("studyGroups")
             .document(groupId)
-            .collection("sessions")
-            .document(sessionId)
-            .updateData([
-                "title":       title,
-                "description": description
-            ])
+            .collection("resources")
+            .document(resourceId)
+            .delete()
+        print("Resource deleted: \(resourceId)")
     }
 
     // -----------------------------------------------
@@ -224,8 +258,8 @@ class FirestoreService {
             throw FirestoreError.notLoggedIn
         }
 
-        let docRef = db.collection("studyGroups").document()
-        let groupId = docRef.documentID
+        let docRef     = db.collection("studyGroups").document()
+        let groupId    = docRef.documentID
         let inviteLink = "https://kuppiya.app/join?groupId=\(groupId)"
 
         var allMembers = [uid]
@@ -236,48 +270,40 @@ class FirestoreService {
         }
 
         let newGroup = StudyGroup(
-            groupId: groupId,
-            name: name,
-            subject: subject,
-            major: major,
+            groupId:     groupId,
+            name:        name,
+            subject:     subject,
+            major:       major,
             description: description,
-            createdBy: uid,
-            members: allMembers,
-            privacy: privacy,
-            university: university,
-            createdAt: Date(),
-            inviteLink: inviteLink
+            createdBy:   uid,
+            members:     allMembers,
+            privacy:     privacy,
+            university:  university,
+            createdAt:   Date(),
+            inviteLink:  inviteLink
         )
 
         try docRef.setData(from: newGroup)
 
         for memberId in allMembers {
-            guard !memberId.isEmpty else {
-                print("Skipping empty memberId")
-                continue
-            }
+            guard !memberId.isEmpty else { continue }
             try await db.collection("users")
                 .document(memberId)
-                .updateData([
-                    "joinedGroups": FieldValue.arrayUnion([groupId])
-                ])
+                .updateData(["joinedGroups": FieldValue.arrayUnion([groupId])])
         }
 
         try await logActivity(
             groupId: groupId,
             actorId: uid,
-            action: "created this group",
-            type: "member"
+            action:  "created this group",
+            type:    "member"
         )
 
         print("Group created: \(groupId)")
         return newGroup
     }
 
-    func fetchPublicGroups(
-        major: String? = nil,
-        searchText: String = ""
-    ) async throws -> [StudyGroup] {
+    func fetchPublicGroups(major: String? = nil, searchText: String = "") async throws -> [StudyGroup] {
         var query: Query = db
             .collection("studyGroups")
             .whereField("privacy", isEqualTo: "public")
@@ -286,10 +312,8 @@ class FirestoreService {
             query = query.whereField("major", isEqualTo: major)
         }
 
-        let snap = try await query.getDocuments()
-        var groups = snap.documents.compactMap {
-            try? $0.data(as: StudyGroup.self)
-        }
+        let snap   = try await query.getDocuments()
+        var groups = snap.documents.compactMap { try? $0.data(as: StudyGroup.self) }
 
         if !searchText.isEmpty {
             let q = searchText.lowercased()
@@ -308,10 +332,7 @@ class FirestoreService {
             .collection("studyGroups")
             .whereField("members", arrayContains: uid)
             .getDocuments()
-
-        return snap.documents.compactMap {
-            try? $0.data(as: StudyGroup.self)
-        }
+        return snap.documents.compactMap { try? $0.data(as: StudyGroup.self) }
     }
 
     func fetchGroup(groupId: String) async throws -> StudyGroup? {
@@ -322,10 +343,7 @@ class FirestoreService {
         return try? doc.data(as: StudyGroup.self)
     }
 
-    func updateGroup(
-        groupId: String,
-        data: [String: Any]
-    ) async throws {
+    func updateGroup(groupId: String, data: [String: Any]) async throws {
         try await db
             .collection("studyGroups")
             .document(groupId)
@@ -340,67 +358,40 @@ class FirestoreService {
         print("Group deleted: \(groupId)")
     }
 
-    // -----------------------------------------------
     // MARK: - Group Settings
-    // -----------------------------------------------
 
-    func updateGroupInfo(
-        groupId: String,
-        name: String,
-        subject: String,
-        description: String
-    ) async throws {
+    func updateGroupInfo(groupId: String, name: String, subject: String, description: String) async throws {
         guard let uid = Auth.auth().currentUser?.uid else { return }
-
         try await db.collection("studyGroups")
             .document(groupId)
             .updateData([
-                "name"       : name,
-                "subject"    : subject,
+                "name":        name,
+                "subject":     subject,
                 "description": description
             ])
-
-        try await logActivity(
-            groupId: groupId,
-            actorId: uid,
-            action: "updated group info",
-            type: "update"
-        )
-
+        try await logActivity(groupId: groupId, actorId: uid,
+                              action: "updated group info", type: "update")
         print("Group info updated")
     }
 
-    func updateGroupPrivacy(
-        groupId: String,
-        privacy: String
-    ) async throws {
+    func updateGroupPrivacy(groupId: String, privacy: String) async throws {
         try await db.collection("studyGroups")
             .document(groupId)
             .updateData(["privacy": privacy])
         print("Privacy updated: \(privacy)")
     }
 
-    func removeMemberFromGroup(
-        groupId: String,
-        memberId: String
-    ) async throws {
+    func removeMemberFromGroup(groupId: String, memberId: String) async throws {
         try await db.collection("studyGroups")
             .document(groupId)
-            .updateData([
-                "members": FieldValue.arrayRemove([memberId])
-            ])
+            .updateData(["members": FieldValue.arrayRemove([memberId])])
         try await db.collection("users")
             .document(memberId)
-            .updateData([
-                "joinedGroups": FieldValue.arrayRemove([groupId])
-            ])
+            .updateData(["joinedGroups": FieldValue.arrayRemove([groupId])])
         print("Member removed: \(memberId)")
     }
 
-    func transferAdmin(
-        groupId: String,
-        newAdminId: String
-    ) async throws {
+    func transferAdmin(groupId: String, newAdminId: String) async throws {
         try await db.collection("studyGroups")
             .document(groupId)
             .updateData(["createdBy": newAdminId])
@@ -409,28 +400,20 @@ class FirestoreService {
 
     func leaveGroupAsAdmin(groupId: String) async throws {
         guard let uid = Auth.auth().currentUser?.uid else { return }
-
         let group = try await fetchGroup(groupId: groupId)
         guard let group else { return }
-
         let remaining = group.members.filter { $0 != uid }
-
         if remaining.isEmpty {
             try await deleteGroup(groupId: groupId)
             print("Group deleted — last member left")
         } else {
-            try await transferAdmin(
-                groupId: groupId,
-                newAdminId: remaining[0]
-            )
+            try await transferAdmin(groupId: groupId, newAdminId: remaining[0])
             try await leaveGroup(groupId: groupId)
             print("Admin transferred to \(remaining[0])")
         }
     }
 
-    // -----------------------------------------------
     // MARK: - Join Requests
-    // -----------------------------------------------
 
     func fetchPendingJoinRequests() async throws -> [JoinRequest] {
         guard let uid = Auth.auth().currentUser?.uid else { return [] }
@@ -442,7 +425,6 @@ class FirestoreService {
 
         let groupIds = groupSnap.documents.map { $0.documentID }
         print("Admin of \(groupIds.count) groups")
-
         guard !groupIds.isEmpty else { return [] }
 
         let requestSnap = try await db
@@ -452,23 +434,17 @@ class FirestoreService {
             .getDocuments()
 
         print("Pending requests: \(requestSnap.documents.count)")
-
-        return requestSnap.documents.compactMap {
-            try? $0.data(as: JoinRequest.self)
-        }
+        return requestSnap.documents.compactMap { try? $0.data(as: JoinRequest.self) }
     }
 
-    func sendJoinRequest(
-        group: StudyGroup,
-        senderName: String
-    ) async throws {
+    func sendJoinRequest(group: StudyGroup, senderName: String) async throws {
         guard let uid = Auth.auth().currentUser?.uid else { return }
 
         let existing = try await db
             .collection("joinRequests")
-            .whereField("groupId", isEqualTo: group.groupId)
+            .whereField("groupId",  isEqualTo: group.groupId)
             .whereField("senderId", isEqualTo: uid)
-            .whereField("status", isEqualTo: "pending")
+            .whereField("status",   isEqualTo: "pending")
             .getDocuments()
 
         guard existing.documents.isEmpty else {
@@ -491,92 +467,59 @@ class FirestoreService {
 
     func approveJoinRequest(_ request: JoinRequest) async throws {
         guard let requestId = request.id else { return }
-
-        try await db.collection("joinRequests")
-            .document(requestId)
+        try await db.collection("joinRequests").document(requestId)
             .updateData(["status": "approved"])
-
-        try await db.collection("studyGroups")
-            .document(request.groupId)
-            .updateData([
-                "members": FieldValue.arrayUnion([request.senderId])
-            ])
-
-        try await db.collection("users")
-            .document(request.senderId)
-            .updateData([
-                "joinedGroups": FieldValue.arrayUnion([request.groupId])
-            ])
-
+        try await db.collection("studyGroups").document(request.groupId)
+            .updateData(["members": FieldValue.arrayUnion([request.senderId])])
+        try await db.collection("users").document(request.senderId)
+            .updateData(["joinedGroups": FieldValue.arrayUnion([request.groupId])])
         try await logActivity(
             groupId: request.groupId,
             actorId: request.senderId,
-            action: "joined the group",
-            type: "member"
+            action:  "joined the group",
+            type:    "member"
         )
-
         print("Approved: \(request.senderName)")
     }
 
     func rejectJoinRequest(_ request: JoinRequest) async throws {
         guard let requestId = request.id else { return }
-
-        try await db.collection("joinRequests")
-            .document(requestId)
+        try await db.collection("joinRequests").document(requestId)
             .updateData(["status": "rejected"])
-
         print("Rejected: \(request.senderName)")
     }
 
     func joinPublicGroup(_ group: StudyGroup) async throws {
         guard let uid = Auth.auth().currentUser?.uid else { return }
-
-        try await db.collection("studyGroups")
-            .document(group.groupId)
+        try await db.collection("studyGroups").document(group.groupId)
             .updateData(["members": FieldValue.arrayUnion([uid])])
-
-        try await db.collection("users")
-            .document(uid)
-            .updateData([
-                "joinedGroups": FieldValue.arrayUnion([group.groupId])
-            ])
-
+        try await db.collection("users").document(uid)
+            .updateData(["joinedGroups": FieldValue.arrayUnion([group.groupId])])
         try await logActivity(
             groupId: group.groupId,
             actorId: uid,
-            action: "joined the group",
-            type: "member"
+            action:  "joined the group",
+            type:    "member"
         )
-
         print("Joined: \(group.name)")
     }
 
     func leaveGroup(groupId: String) async throws {
         guard let uid = Auth.auth().currentUser?.uid else { return }
-
-        try await db.collection("studyGroups")
-            .document(groupId)
+        try await db.collection("studyGroups").document(groupId)
             .updateData(["members": FieldValue.arrayRemove([uid])])
-
-        try await db.collection("users")
-            .document(uid)
-            .updateData([
-                "joinedGroups": FieldValue.arrayRemove([groupId])
-            ])
-
+        try await db.collection("users").document(uid)
+            .updateData(["joinedGroups": FieldValue.arrayRemove([groupId])])
         try await logActivity(
             groupId: groupId,
             actorId: uid,
-            action: "left the group",
-            type: "member"
+            action:  "left the group",
+            type:    "member"
         )
-
         print("Left group: \(groupId)")
     }
 
-    // -----------------------------------------------
     // MARK: - Activities
-    // -----------------------------------------------
 
     func fetchActivities(for groupId: String) async throws -> [Activity] {
         let snap = try await db
@@ -595,9 +538,9 @@ class FirestoreService {
     func logActivity(
         groupId: String,
         actorId: String,
-        action: String,
-        target: String? = nil,
-        type: String
+        action:  String,
+        target:  String? = nil,
+        type:    String
     ) async throws {
         let data: [String: Any] = [
             "actorId"  : actorId,
@@ -617,26 +560,19 @@ class FirestoreService {
     // MARK: - Reviews
     // -----------------------------------------------
 
-    func submitReview(
-        groupId: String,
-        rating: Int,
-        review: String
-    ) async throws {
+    func submitReview(groupId: String, rating: Int, review: String) async throws {
         guard let uid = Auth.auth().currentUser?.uid else { return }
-
         let data: [String: Any] = [
             "authorId" : uid,
             "rating"   : rating,
             "review"   : review,
             "createdAt": Timestamp(date: Date())
         ]
-
         try await db
             .collection("studyGroups")
             .document(groupId)
             .collection("reviews")
             .addDocument(data: data)
-
         print("Review submitted for: \(groupId)")
     }
 
@@ -647,80 +583,44 @@ class FirestoreService {
             .collection("reviews")
             .order(by: "createdAt", descending: true)
             .getDocuments()
-
-        return snap.documents.compactMap {
-            try? $0.data(as: GroupReview.self)
-        }
+        return snap.documents.compactMap { try? $0.data(as: GroupReview.self) }
     }
 
-    // -----------------------------------------------
     // MARK: - Storage
-    // -----------------------------------------------
 
-    func uploadGroupImage(
-        groupId: String,
-        image: UIImage
-    ) async throws -> String {
+    func uploadGroupImage(groupId: String, image: UIImage) async throws -> String {
         guard let uid = Auth.auth().currentUser?.uid,
               let imageData = image.jpegData(compressionQuality: 0.7)
-        else {
-            throw FirestoreError.invalidImage
-        }
+        else { throw FirestoreError.invalidImage }
 
-        let storageRef = Storage.storage()
-            .reference()
+        let storageRef = Storage.storage().reference()
             .child("groupImages/\(groupId)/avatar.jpg")
-
         let metadata = StorageMetadata()
         metadata.contentType = "image/jpeg"
-
-        _ = try await storageRef.putDataAsync(
-            imageData, metadata: metadata)
+        _ = try await storageRef.putDataAsync(imageData, metadata: metadata)
         let downloadURL = try await storageRef.downloadURL()
 
-        try await db.collection("studyGroups")
-            .document(groupId)
-            .updateData([
-                "groupImageURL": downloadURL.absoluteString
-            ])
-
-        try await logActivity(
-            groupId: groupId,
-            actorId: uid,
-            action: "updated group photo",
-            type: "update"
-        )
-
+        try await db.collection("studyGroups").document(groupId)
+            .updateData(["groupImageURL": downloadURL.absoluteString])
+        try await logActivity(groupId: groupId, actorId: uid,
+                              action: "updated group photo", type: "update")
         print("Group image uploaded: \(downloadURL)")
         return downloadURL.absoluteString
     }
 
-    func uploadProfileImage(
-        uid: String,
-        image: UIImage
-    ) async throws -> String {
+    func uploadProfileImage(uid: String, image: UIImage) async throws -> String {
         guard let imageData = image.jpegData(compressionQuality: 0.7)
-        else {
-            throw FirestoreError.invalidImage
-        }
+        else { throw FirestoreError.invalidImage }
 
-        let storageRef = Storage.storage()
-            .reference()
+        let storageRef = Storage.storage().reference()
             .child("profileImages/\(uid)/avatar.jpg")
-
         let metadata = StorageMetadata()
         metadata.contentType = "image/jpeg"
-
-        _ = try await storageRef.putDataAsync(
-            imageData, metadata: metadata)
+        _ = try await storageRef.putDataAsync(imageData, metadata: metadata)
         let downloadURL = try await storageRef.downloadURL()
 
-        try await db.collection("users")
-            .document(uid)
-            .updateData([
-                "profileImage": downloadURL.absoluteString
-            ])
-
+        try await db.collection("users").document(uid)
+            .updateData(["profileImage": downloadURL.absoluteString])
         print("Profile image uploaded: \(downloadURL)")
         return downloadURL.absoluteString
     }
@@ -730,58 +630,40 @@ class FirestoreService {
     // -----------------------------------------------
 
     func fetchAllUsers() async throws -> [AppUser] {
-        let snap = try await db
-            .collection("users")
-            .limit(to: 100)
-            .getDocuments()
-        return snap.documents.compactMap {
-            try? $0.data(as: AppUser.self)
-        }
+        let snap = try await db.collection("users").limit(to: 100).getDocuments()
+        return snap.documents.compactMap { try? $0.data(as: AppUser.self) }
     }
 
     func fetchUser(uid: String) async throws -> AppUser? {
         guard !uid.isEmpty else {
-            print("⚠️ fetchUser called with empty uid")
+            print("fetchUser called with empty uid")
             return nil
         }
-        let doc = try await db
-            .collection("users")
-            .document(uid)
-            .getDocument()
+        let doc = try await db.collection("users").document(uid).getDocument()
         return try? doc.data(as: AppUser.self)
     }
 
     func updateUser(uid: String, data: [String: Any]) async throws {
-        try await db.collection("users")
-            .document(uid)
-            .updateData(data)
+        try await db.collection("users").document(uid).updateData(data)
     }
 
     func searchUsers(query: String) async throws -> [AppUser] {
-        let snap = try await db
-            .collection("users")
+        let snap = try await db.collection("users")
             .whereField("username", isGreaterThanOrEqualTo: query)
             .whereField("username", isLessThanOrEqualTo: query + "\u{f8ff}")
             .limit(to: 20)
             .getDocuments()
-
-        return snap.documents.compactMap {
-            try? $0.data(as: AppUser.self)
-        }
+        return snap.documents.compactMap { try? $0.data(as: AppUser.self) }
     }
 
     // -----------------------------------------------
     // MARK: - Interests
     // -----------------------------------------------
 
-    func saveInterests(
-        uid: String,
-        interests: [String]
-    ) async throws {
-        try await db.collection("users")
-            .document(uid)
+    func saveInterests(uid: String, interests: [String]) async throws {
+        try await db.collection("users").document(uid)
             .updateData(["interests": interests])
-        print("✅ Interests saved: \(interests)")
+        print("Interests saved: \(interests)")
     }
 
     func hasInterests(uid: String) async throws -> Bool {
@@ -807,18 +689,20 @@ class FirestoreService {
     }
 
     func fetchScoredRecommendedGroups(user: AppUser) async throws -> [StudyGroup] {
-        let all = try await fetchAllGroupsForDiscovery()
+        let all       = try await fetchAllGroupsForDiscovery()
         let notJoined = all.filter { !$0.members.contains(user.uid) }
         let interests = user.interests.filter { !$0.isEmpty && $0 != "skipped" }
 
         let scored: [(StudyGroup, Int)] = notJoined.map { group in
             var score = 0
-            if !user.major.isEmpty, group.major.lowercased() == user.major.lowercased() { score += 10 }
+            if !user.major.isEmpty,
+               group.major.lowercased() == user.major.lowercased() { score += 10 }
             if !interests.isEmpty, interests.contains(where: {
                 group.subject.lowercased().contains($0.lowercased()) ||
                 group.name.lowercased().contains($0.lowercased())
             }) { score += 5 }
-            if !user.university.isEmpty, group.university.lowercased() == user.university.lowercased() { score += 3 }
+            if !user.university.isEmpty,
+               group.university.lowercased() == user.university.lowercased() { score += 3 }
             return (group, score)
         }
 
@@ -827,7 +711,7 @@ class FirestoreService {
     }
 
     func fetchTrendingGroupsCombined(currentUserUid: String) async throws -> [StudyGroup] {
-        let all = try await fetchAllGroupsForDiscovery()
+        let all          = try await fetchAllGroupsForDiscovery()
         let sevenDaysAgo = Date().addingTimeInterval(-7 * 24 * 60 * 60)
         var scored: [(StudyGroup, Double)] = []
 
@@ -838,7 +722,8 @@ class FirestoreService {
                 .collection("activities")
                 .whereField("createdAt", isGreaterThan: Timestamp(date: sevenDaysAgo))
                 .getDocuments()
-            let score = Double(group.members.count) * 0.6 + Double(activitySnap.documents.count) * 0.4
+            let score = Double(group.members.count) * 0.6
+                      + Double(activitySnap.documents.count) * 0.4
             scored.append((group, score))
         }
 
@@ -848,7 +733,7 @@ class FirestoreService {
     func searchAllGroups(query: String) async throws -> [StudyGroup] {
         guard !query.isEmpty else { return [] }
         let all = try await fetchAllGroupsForDiscovery()
-        let q = query.lowercased()
+        let q   = query.lowercased()
         return all.filter {
             $0.name.lowercased().contains(q) ||
             $0.subject.lowercased().contains(q) ||
@@ -860,11 +745,47 @@ class FirestoreService {
     func checkPendingRequest(groupId: String) async throws -> Bool {
         guard let uid = Auth.auth().currentUser?.uid else { return false }
         let snap = try await db.collection("joinRequests")
-            .whereField("groupId", isEqualTo: groupId)
+            .whereField("groupId",  isEqualTo: groupId)
             .whereField("senderId", isEqualTo: uid)
-            .whereField("status", isEqualTo: "pending")
+            .whereField("status",   isEqualTo: "pending")
             .getDocuments()
         return !snap.documents.isEmpty
+    }
+    
+    func fetchFavouriteResources() async throws -> [Resource] {
+        guard let uid = Auth.auth().currentUser?.uid else { return [] }
+        let groups = try await fetchMyGroups()
+        var results: [Resource] = []
+        for group in groups {
+            let snap = try await db
+                .collection("studyGroups")
+                .document(group.groupId)
+                .collection("resources")
+                .whereField("likedBy", arrayContains: uid)
+                .getDocuments()
+            results.append(contentsOf: snap.documents.compactMap {
+                try? $0.data(as: Resource.self)
+            })
+        }
+        return results.sorted { $0.createdAt > $1.createdAt }
+    }
+
+    func fetchBookmarkedResources() async throws -> [Resource] {
+        guard let uid = Auth.auth().currentUser?.uid else { return [] }
+        let groups = try await fetchMyGroups()
+        var results: [Resource] = []
+        for group in groups {
+            let snap = try await db
+                .collection("studyGroups")
+                .document(group.groupId)
+                .collection("resources")
+                .whereField("savedBy", arrayContains: uid)
+                .getDocuments()
+            results.append(contentsOf: snap.documents.compactMap {
+                try? $0.data(as: Resource.self)
+            })
+        }
+        return results.sorted { $0.createdAt > $1.createdAt }
     }
 
     // Expose db for ViewModel
@@ -875,6 +796,7 @@ class FirestoreService {
 // -----------------------------------------------
 // MARK: - Errors
 // -----------------------------------------------
+
 enum FirestoreError: LocalizedError {
     case notLoggedIn
     case groupNotFound
