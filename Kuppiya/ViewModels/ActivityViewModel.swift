@@ -5,29 +5,76 @@
 //  Created by M H T U De Silva on 2026-05-04.
 //
 
+import SwiftUI
 import Foundation
 import FirebaseAuth
 import Combine
 
 @MainActor
 class ActivityViewModel: ObservableObject {
-    @Published var selectedTab     = 0
-    @Published var downloads:      [URL]      = []
-    @Published var favourites:     [Resource] = []
-    @Published var bookmarked:     [Resource] = []
-    @Published var summaries:      [(resourceId: String, title: String, summaryText: String, generatedAt: Date)] = []
-    @Published var searchText      = ""
-    @Published var isLoading       = false
-    @Published var showError       = false
-    @Published var errorMessage    = ""
-    @Published var fileToOpen:     URL?
+    @Published var selectedTab = 0
+    @Published var downloads: [URL] = []
+    @Published var favourites: [Resource] = []
+    @Published var bookmarked: [Resource] = []
+    @Published var summaries: [(resourceId: String, title: String, summaryText: String, generatedAt: Date)] = []
+    @Published var searchText = ""
+    @Published var isLoading = false
+    @Published var showError = false
+    @Published var errorMessage = ""
+    @Published var fileToOpen: URL?
     @Published var showFilePreview = false
-    @Published var shareURL:       URL?
-    @Published var showShareSheet  = false
-    @Published var isOffline       = false
+    @Published var shareURL: URL?
+    @Published var showShareSheet = false
+    @Published var isOffline = false
 
     private let service = FirestoreService.shared
+    private var cancellables = Set<AnyCancellable>()
+
     let tabs = ["Downloads", "Favourites", "Bookmarked", "Summarized"]
+
+//    init() {
+//        // Observe network changes in real time
+//        NetworkMonitor.shared.$isConnected
+//            .receive(on: DispatchQueue.main)
+//            .sink { [weak self] connected in
+//                guard let self else { return }
+//                self.isOffline = !connected
+//                if connected {
+//                    // Back online — reload Firestore tabs
+//                    Task { await self.loadAll() }
+//                } else {
+//                    // Gone offline — clear Firestore tabs
+//                    self.favourites = []
+//                    self.bookmarked = []
+//                }
+//            }
+//            .store(in: &cancellables)
+//    }
+    
+    init() {
+        // Set initial state
+        isOffline = !NetworkMonitor.shared.isConnected
+
+        // Observe changes
+        NetworkMonitor.shared.$isConnected
+            .removeDuplicates()
+            .dropFirst() // Skip initial value — we set it manually above
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] connected in
+                guard let self else { return }
+                self.isOffline = !connected
+                if connected {
+                    Task {
+                        try? await Task.sleep(nanoseconds: 500_000_000)
+                        await self.loadAll()
+                    }
+                } else {
+                    self.favourites = []
+                    self.bookmarked = []
+                }
+            }
+            .store(in: &cancellables)
+    }
 
     // MARK: - Filtered
 
@@ -63,14 +110,11 @@ class ActivityViewModel: ObservableObject {
 
     func loadAll() async {
         isLoading = true
-        isOffline = !NetworkMonitor.shared.isConnected
         defer { isLoading = false }
 
-        // Always load from Core Data — works offline
         loadDownloads()
         loadSummaries()
 
-        // Only load from Firestore if online
         if NetworkMonitor.shared.isConnected {
             async let f: () = loadFavourites()
             async let b: () = loadBookmarked()
@@ -104,7 +148,7 @@ class ActivityViewModel: ObservableObject {
             favourites = try await service.fetchFavouriteResources()
         } catch {
             errorMessage = error.localizedDescription
-            showError    = true
+            showError = true
         }
     }
 
@@ -113,7 +157,7 @@ class ActivityViewModel: ObservableObject {
             bookmarked = try await service.fetchBookmarkedResources()
         } catch {
             errorMessage = error.localizedDescription
-            showError    = true
+            showError = true
         }
     }
 
@@ -125,12 +169,12 @@ class ActivityViewModel: ObservableObject {
     // MARK: - Actions
 
     func openFile(url: URL) {
-        fileToOpen     = url
+        fileToOpen = url
         showFilePreview = true
     }
 
     func shareFile(url: URL) {
-        shareURL      = url
+        shareURL = url
         showShareSheet = true
     }
 
@@ -160,16 +204,16 @@ class ActivityViewModel: ObservableObject {
 
     func fileIcon(url: URL) -> String {
         switch url.pathExtension.lowercased() {
-        case "pdf":                return "doc.fill"
+        case "pdf": return "doc.fill"
         case "png", "jpg", "jpeg": return "photo.fill"
-        case "mp4", "mov":         return "video.fill"
-        default:                   return "doc.fill"
+        case "mp4", "mov": return "video.fill"
+        default: return "doc.fill"
         }
     }
 
     func fileIconColor(url: URL) -> String {
         switch url.pathExtension.lowercased() {
-        case "pdf":                return "#E84040"
+        case "pdf": return "#E84040"
         case "png", "jpg", "jpeg": return "#1D9E75"
         case "mp4", "mov":         return "#6B3FD4"
         default:                   return "#BA7517"

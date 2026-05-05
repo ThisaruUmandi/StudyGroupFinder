@@ -23,10 +23,13 @@ struct UploadResourceView: View {
                 // Mascot
                 HStack {
                     Spacer()
-                    Image("home_girl")
+                    Image("uploadgirl")
                         .resizable()
                         .scaledToFit()
-                        .frame(width: 100)
+                        .frame(width: 140)
+                        .padding(.bottom, -35)
+                        .padding(.top, 30)
+                        //.padding(.leading, -150)
                     Spacer()
                 }
                 .padding(.top, 8)
@@ -38,10 +41,10 @@ struct UploadResourceView: View {
                 // Type segment
                 sectionLabel("RESOURCE TYPE").padding(.top, 24)
                 KSegmentControl(
-                    options: ["Document", "Media", "Link"],
+                    options: ["Docs", "Media", "Link"],
                     selected: $vm.selectedType
                 )
-                .padding(.top, 8)
+                .padding(.top, 10)
 
                 // Fields based on type
                 if vm.selectedType == 2 {

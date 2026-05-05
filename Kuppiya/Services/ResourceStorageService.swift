@@ -5,7 +5,6 @@
 //  Created by M H T U De Silva on 2026-05-04.
 //
 
-
 import Foundation
 import FirebaseStorage
 
@@ -32,7 +31,7 @@ class ResourceStorageService {
         _ = try await ref.putDataAsync(data, metadata: metadata)
         let url = try await ref.downloadURL()
 
-        print("📤 File uploaded:", url.absoluteString)
+        print("File uploaded:", url.absoluteString)
         return url.absoluteString
     }
 

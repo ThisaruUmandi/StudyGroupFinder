@@ -752,6 +752,301 @@ class FirestoreService {
         return !snap.documents.isEmpty
     }
     
+    // -----------------------------------------------
+    // MARK: - QnA
+    // -----------------------------------------------
+
+    func fetchQuestions(groupId: String) async throws -> [Question] {
+        let snap = try await db
+            .collection("studyGroups")
+            .document(groupId)
+            .collection("questions")
+            .order(by: "createdAt", descending: true)
+            .getDocuments()
+        return snap.documents.compactMap { try? $0.data(as: Question.self) }
+    }
+
+    func postQuestion(groupId: String, authorId: String, authorName: String,
+                      title: String, description: String, tag: String) async throws {
+        let questionId = UUID().uuidString
+        let data: [String: Any] = [
+            "questionId": questionId,
+            "groupId": groupId,
+            "authorId": authorId,
+            "authorName": authorName,
+            "title": title,
+            "description": description,
+            "tag": tag,
+            "upvotes": [],
+            "answerCount": 0,
+            "bestAnswerId": NSNull(),
+            "createdAt": Timestamp(date: Date()),
+            "status": "unanswered"
+        ]
+        try await db
+            .collection("studyGroups")
+            .document(groupId)
+            .collection("questions")
+            .document(questionId)
+            .setData(data)
+
+        // Award +10 points for posting question
+        try await awardPoints(uid: authorId, points: 10)
+
+        // Log activity
+        try await logActivity(
+            groupId: groupId,
+            actorId: authorId,
+            action: "posted a question",
+            type: "qna"
+        )
+    }
+
+    func fetchAnswers(groupId: String, questionId: String) async throws -> [Answer] {
+        let snap = try await db
+            .collection("studyGroups")
+            .document(groupId)
+            .collection("questions")
+            .document(questionId)
+            .collection("answers")
+            .order(by: "createdAt", descending: false)
+            .getDocuments()
+        return snap.documents.compactMap { try? $0.data(as: Answer.self) }
+    }
+
+    func postAnswer(groupId: String, questionId: String, authorId: String,
+                    authorName: String, body: String) async throws {
+        let answerId = UUID().uuidString
+        let data: [String: Any] = [
+            "answerId": answerId,
+            "questionId": questionId,
+            "authorId": authorId,
+            "authorName": authorName,
+            "body": body,
+            "upvotes": [],
+            "isBestAnswer": false,
+            "createdAt": Timestamp(date: Date())
+        ]
+        try await db
+            .collection("studyGroups")
+            .document(groupId)
+            .collection("questions")
+            .document(questionId)
+            .collection("answers")
+            .document(answerId)
+            .setData(data)
+
+        // Update answer count
+        try await db
+            .collection("studyGroups")
+            .document(groupId)
+            .collection("questions")
+            .document(questionId)
+            .updateData([
+                "answerCount": FieldValue.increment(Int64(1)),
+                "status": "answered"
+            ])
+
+        // Award +15 points for answering
+        try await awardPoints(uid: authorId, points: 15)
+    }
+
+    func markBestAnswer(groupId: String, questionId: String,
+                        answerId: String, authorId: String) async throws {
+        // Unmark previous best answer if any
+        let answers = try await fetchAnswers(groupId: groupId, questionId: questionId)
+        for answer in answers where answer.isBestAnswer {
+            try await db
+                .collection("studyGroups")
+                .document(groupId)
+                .collection("questions")
+                .document(questionId)
+                .collection("answers")
+                .document(answer.answerId)
+                .updateData(["isBestAnswer": false])
+        }
+
+        // Mark new best answer
+        try await db
+            .collection("studyGroups")
+            .document(groupId)
+            .collection("questions")
+            .document(questionId)
+            .collection("answers")
+            .document(answerId)
+            .updateData(["isBestAnswer": true])
+
+        // Update question
+        try await db
+            .collection("studyGroups")
+            .document(groupId)
+            .collection("questions")
+            .document(questionId)
+            .updateData(["bestAnswerId": answerId])
+
+        // Award +25 points bonus
+        try await awardPoints(uid: authorId, points: 25)
+    }
+
+    func toggleQuestionUpvote(groupId: String, questionId: String,
+                              uid: String, isUpvoted: Bool) async throws {
+        try await db
+            .collection("studyGroups")
+            .document(groupId)
+            .collection("questions")
+            .document(questionId)
+            .updateData([
+                "upvotes": isUpvoted
+                    ? FieldValue.arrayRemove([uid])
+                    : FieldValue.arrayUnion([uid])
+            ])
+    }
+
+    func toggleAnswerUpvote(groupId: String, questionId: String,
+                            answerId: String, uid: String, isUpvoted: Bool) async throws {
+        try await db
+            .collection("studyGroups")
+            .document(groupId)
+            .collection("questions")
+            .document(questionId)
+            .collection("answers")
+            .document(answerId)
+            .updateData([
+                "upvotes": isUpvoted
+                    ? FieldValue.arrayRemove([uid])
+                    : FieldValue.arrayUnion([uid])
+            ])
+    }
+
+    private func awardPoints(uid: String, points: Int) async throws {
+        try await db
+            .collection("users")
+            .document(uid)
+            .updateData(["points": FieldValue.increment(Int64(points))])
+    }
+    
+    // -----------------------------------------------
+    // MARK: - Polls
+    // -----------------------------------------------
+
+    func fetchPolls(groupId: String) async throws -> [Poll] {
+        let snap = try await db
+            .collection("studyGroups")
+            .document(groupId)
+            .collection("polls")
+            .order(by: "createdAt", descending: true)
+            .getDocuments()
+        return snap.documents.compactMap { try? $0.data(as: Poll.self) }
+    }
+
+    func createPoll(
+        groupId:      String,
+        authorId:     String,
+        authorName:   String,
+        question:     String,
+        options:      [String],
+        correctIndex: Int,
+        duration:     Int
+    ) async throws {
+        let pollId  = UUID().uuidString
+        let endsAt  = Date().addingTimeInterval(Double(duration) * 3600)
+        let pollOptions = options.enumerated().map { index, text in
+            ["id": UUID().uuidString, "text": text, "voteCount": 0]
+        }
+
+        let data: [String: Any] = [
+            "pollId":       pollId,
+            "groupId":      groupId,
+            "authorId":     authorId,
+            "authorName":   authorName,
+            "question":     question,
+            "options":      pollOptions,
+            "correctIndex": correctIndex,
+            "duration":     duration,
+            "endsAt":       Timestamp(date: endsAt),
+            "status":       "active",
+            "createdAt":    Timestamp(date: Date()),
+            "totalVotes":   0
+        ]
+
+        try await db
+            .collection("studyGroups")
+            .document(groupId)
+            .collection("polls")
+            .document(pollId)
+            .setData(data)
+
+        try await awardPoints(uid: authorId, points: 15)
+
+        try await logActivity(
+            groupId: groupId,
+            actorId: authorId,
+            action:  "created a poll",
+            type:    "poll"
+        )
+    }
+
+    func vote(groupId: String, pollId: String, optionIndex: Int, uid: String) async throws {
+        let voteData: [String: Any] = [
+            "uid":        uid,
+            "optionIndex": optionIndex,
+            "votedAt":    Timestamp(date: Date())
+        ]
+
+        try await db
+            .collection("studyGroups")
+            .document(groupId)
+            .collection("polls")
+            .document(pollId)
+            .collection("votes")
+            .document(uid)
+            .setData(voteData)
+
+        // Increment option voteCount
+        let pollRef = db
+            .collection("studyGroups")
+            .document(groupId)
+            .collection("polls")
+            .document(pollId)
+
+        let snap = try await pollRef.getDocument()
+        if var options = snap.data()?["options"] as? [[String: Any]] {
+            options[optionIndex]["voteCount"] = (options[optionIndex]["voteCount"] as? Int ?? 0) + 1
+            try await pollRef.updateData([
+                "options":    options,
+                "totalVotes": FieldValue.increment(Int64(1))
+            ])
+        }
+
+        try await awardPoints(uid: uid, points: 8)
+    }
+
+    func fetchUserVote(groupId: String, pollId: String, uid: String) async throws -> Int? {
+        let snap = try await db
+            .collection("studyGroups")
+            .document(groupId)
+            .collection("polls")
+            .document(pollId)
+            .collection("votes")
+            .document(uid)
+            .getDocument()
+
+        return snap.data()?["optionIndex"] as? Int
+    }
+
+    func closePoll(groupId: String, pollId: String) async throws {
+        try await db
+            .collection("studyGroups")
+            .document(groupId)
+            .collection("polls")
+            .document(pollId)
+            .updateData(["status": "closed"])
+    }
+    
+    // -----------------------------------------------
+    // MARK: - Resource - Activity
+    // -----------------------------------------------
+    
     func fetchFavouriteResources() async throws -> [Resource] {
         guard let uid = Auth.auth().currentUser?.uid else { return [] }
         let groups = try await fetchMyGroups()

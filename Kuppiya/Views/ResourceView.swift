@@ -32,11 +32,13 @@ struct ResourceView: View {
             VStack(spacing: 0) {
                 navBar
                 filterBar.padding(.top, 16)
-                searchBar.padding(.top, 12).padding(.horizontal, 20)
+                KSearchBar(text: $searchText, placeholder: "Search resources...")
+                    .padding(.top, 16)
+                    .padding(.horizontal, 20)
                 resourceList.padding(.top, 16)
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
 
-            // FAB
             Button { showUpload = true } label: {
                 Image(systemName: "plus")
                     .font(.system(size: 20, weight: .semibold))
@@ -53,12 +55,10 @@ struct ResourceView: View {
         .navigationBarHidden(true)
         .navigationDestination(item: $selectedResource) { resource in
             ResourceDetailView(resource: resource, group: group)
-            //Text ("ResourceDetailView")
                 .environmentObject(authVM)
         }
         .navigationDestination(isPresented: $showUpload) {
             UploadResourceView(group: group)
-            //Text("UploadResourceView")
                 .environmentObject(authVM)
         }
         .onChange(of: showUpload) { _, isShowing in
@@ -72,6 +72,7 @@ struct ResourceView: View {
         }
     }
 
+    // MARK: - Nav Bar
     private var navBar: some View {
         HStack {
             Button { dismiss() } label: {
@@ -85,51 +86,57 @@ struct ResourceView: View {
             }
             Spacer()
             Text("Resources")
-                .font(.system(size: 17, weight: .semibold))
+                .font(.system(size: 22, weight: .semibold))
             Spacer()
-            Image("oboy_r")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 54)
-                .offset(y: -6)
+//            Image("oboy_l")
+//                .resizable()
+//                .scaledToFit()
+//                .frame(width: 54)
+//                .offset(y: -6)
+//                .padding(.horizontal, -20)
         }
         .padding(.horizontal, 20)
         .padding(.top, 16)
     }
 
+    // MARK: - Filter Bar
     private var filterBar: some View {
-        KSegmentControl(
-            options: vm.filters,
-            selected: Binding(
-                get: { vm.filters.firstIndex(of: vm.selectedFilter) ?? 0 },
-                set: { vm.selectedFilter = vm.filters[$0] }
-            )
-        )
-        .padding(.horizontal, 20)
-    }
-
-    private var searchBar: some View {
-        HStack(spacing: 10) {
-            Image(systemName: "magnifyingglass")
-                .foregroundColor(.secondary)
-            TextField("Search...", text: $searchText)
-                .font(.system(size: 14))
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 8) {
+                ForEach(vm.filters.indices, id: \.self) { index in
+                    Button {
+                        vm.selectedFilter = vm.filters[index]
+                    } label: {
+                        Text(vm.filters[index])
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundColor(
+                                vm.selectedFilter == vm.filters[index] ? .white : .primary
+                            )
+                            .padding(.horizontal, 20)
+                            .padding(.vertical, 10)
+                            .background(
+                                vm.selectedFilter == vm.filters[index]
+                                    ? Color(hex: "#0300BF")
+                                    : Color.white
+                            )
+                            .clipShape(Capsule())
+                            .shadow(color: .black.opacity(0.06), radius: 4, x: 0, y: 2)
+                    }
+                }
+            }
+            .padding(.horizontal, 20)
+            .padding(.vertical, 4)
+            .frame(minWidth: UIScreen.main.bounds.width)
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 11)
-        .background(Color.white)
-        .cornerRadius(12)
-        .shadow(color: .black.opacity(0.05), radius: 6, x: 0, y: 2)
     }
 
+    // MARK: - Resource List
     private var resourceList: some View {
         Group {
             if vm.isLoading {
-                Spacer()
                 ProgressView()
-                Spacer()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if displayed.isEmpty {
-                Spacer()
                 VStack(spacing: 10) {
                     Image(systemName: "folder")
                         .font(.system(size: 32))
@@ -137,8 +144,12 @@ struct ResourceView: View {
                     Text("No resources yet")
                         .font(.system(size: 14))
                         .foregroundColor(.secondary)
+                    Text("Upload one to get started!")
+                        .font(.system(size: 12))
+                        .foregroundColor(.secondary.opacity(0.7))
                 }
-                Spacer()
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .padding(.bottom, 80)
             } else {
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 10) {
@@ -163,17 +174,23 @@ struct ResourceView: View {
                 }
             }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
 
 #Preview {
     NavigationStack {
         ResourceView(group: StudyGroup(
-            groupId: "preview", name: "iOS Dev",
-            subject: "iOS Development", major: "Computer Science",
-            description: "Test", createdBy: "uid1",
-            members: ["uid1"], privacy: "public",
-            university: "NIBM", createdAt: Date()
+            groupId:     "preview",
+            name:        "iOS Dev",
+            subject:     "iOS Development",
+            major:       "Computer Science",
+            description: "Test",
+            createdBy:   "uid1",
+            members:     ["uid1"],
+            privacy:     "public",
+            university:  "NIBM",
+            createdAt:   Date()
         ))
         .environmentObject(AuthViewModel())
     }
