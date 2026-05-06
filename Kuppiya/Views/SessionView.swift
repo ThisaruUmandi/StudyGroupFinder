@@ -28,6 +28,12 @@ struct SessionView: View {
 
                     if let ongoing = viewModel.ongoingSession {
                         KSessionCard(session: ongoing) {
+                            Task {
+                                try? await FirestoreService.shared.markAttendance(
+                                    sessionId: ongoing.sessionId,
+                                    groupId:   ongoing.groupId
+                                )
+                            }
                             if let url = URL(string: ongoing.joinLink),
                                !ongoing.joinLink.isEmpty {
                                 UIApplication.shared.open(url)

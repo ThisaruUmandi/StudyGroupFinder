@@ -126,9 +126,9 @@ class FirestoreService {
         try await logActivity(
             groupId: groupId,
             actorId: uid,
-            action: "created a session",
-            target: session.title,
-            type: "session"
+            action:  "created a session",
+            target:  session.title,
+            type:    "session"
         )
 
         print("Session created: \(docRef.documentID)")
@@ -171,12 +171,24 @@ class FirestoreService {
             print("markAttendance: sessionId or groupId is empty")
             return
         }
+
         try await db
             .collection("studyGroups")
             .document(groupId)
             .collection("sessions")
             .document(sessionId)
             .updateData(["attendees": FieldValue.arrayUnion([uid])])
+
+        // Log session attendance for progress tracking
+        let user = try await fetchUser(uid: uid)
+        Task {
+            try? await StudyProgressService.shared.logSessionAttendance(
+                uid:           uid,
+                groupId:       groupId,
+                username:      user?.username ?? "Unknown",
+                durationHours: 2.0
+            )
+        }
     }
 
     // -----------------------------------------------
@@ -299,6 +311,14 @@ class FirestoreService {
             type:    "member"
         )
 
+        // Init groupStat for creator
+        let user = try await fetchUser(uid: uid)
+        try await StudyProgressService.shared.initGroupStat(
+            uid:      uid,
+            groupId:  groupId,
+            username: user?.username ?? "Unknown"
+        )
+
         print("Group created: \(groupId)")
         return newGroup
     }
@@ -369,8 +389,12 @@ class FirestoreService {
                 "subject":     subject,
                 "description": description
             ])
-        try await logActivity(groupId: groupId, actorId: uid,
-                              action: "updated group info", type: "update")
+        try await logActivity(
+            groupId: groupId,
+            actorId: uid,
+            action:  "updated group info",
+            type:    "update"
+        )
         print("Group info updated")
     }
 
@@ -430,7 +454,7 @@ class FirestoreService {
         let requestSnap = try await db
             .collection("joinRequests")
             .whereField("groupId", in: groupIds)
-            .whereField("status", isEqualTo: "pending")
+            .whereField("status",  isEqualTo: "pending")
             .getDocuments()
 
         print("Pending requests: \(requestSnap.documents.count)")
@@ -467,6 +491,7 @@ class FirestoreService {
 
     func approveJoinRequest(_ request: JoinRequest) async throws {
         guard let requestId = request.id else { return }
+
         try await db.collection("joinRequests").document(requestId)
             .updateData(["status": "approved"])
         try await db.collection("studyGroups").document(request.groupId)
@@ -479,6 +504,15 @@ class FirestoreService {
             action:  "joined the group",
             type:    "member"
         )
+
+        // Init groupStat for new member
+        let user = try await fetchUser(uid: request.senderId)
+        try await StudyProgressService.shared.initGroupStat(
+            uid:      request.senderId,
+            groupId:  request.groupId,
+            username: user?.username ?? request.senderName
+        )
+
         print("Approved: \(request.senderName)")
     }
 
@@ -491,6 +525,7 @@ class FirestoreService {
 
     func joinPublicGroup(_ group: StudyGroup) async throws {
         guard let uid = Auth.auth().currentUser?.uid else { return }
+
         try await db.collection("studyGroups").document(group.groupId)
             .updateData(["members": FieldValue.arrayUnion([uid])])
         try await db.collection("users").document(uid)
@@ -501,6 +536,15 @@ class FirestoreService {
             action:  "joined the group",
             type:    "member"
         )
+
+        // Init groupStat for new member
+        let user = try await fetchUser(uid: uid)
+        try await StudyProgressService.shared.initGroupStat(
+            uid:      uid,
+            groupId:  group.groupId,
+            username: user?.username ?? "Unknown"
+        )
+
         print("Joined: \(group.name)")
     }
 
@@ -602,8 +646,12 @@ class FirestoreService {
 
         try await db.collection("studyGroups").document(groupId)
             .updateData(["groupImageURL": downloadURL.absoluteString])
-        try await logActivity(groupId: groupId, actorId: uid,
-                              action: "updated group photo", type: "update")
+        try await logActivity(
+            groupId: groupId,
+            actorId: uid,
+            action:  "updated group photo",
+            type:    "update"
+        )
         print("Group image uploaded: \(downloadURL)")
         return downloadURL.absoluteString
     }
@@ -751,7 +799,7 @@ class FirestoreService {
             .getDocuments()
         return !snap.documents.isEmpty
     }
-    
+
     // -----------------------------------------------
     // MARK: - QnA
     // -----------------------------------------------
@@ -766,22 +814,24 @@ class FirestoreService {
         return snap.documents.compactMap { try? $0.data(as: Question.self) }
     }
 
-    func postQuestion(groupId: String, authorId: String, authorName: String,
-                      title: String, description: String, tag: String) async throws {
+    func postQuestion(
+        groupId: String, authorId: String, authorName: String,
+        title: String, description: String, tag: String
+    ) async throws {
         let questionId = UUID().uuidString
         let data: [String: Any] = [
-            "questionId": questionId,
-            "groupId": groupId,
-            "authorId": authorId,
-            "authorName": authorName,
-            "title": title,
+            "questionId":  questionId,
+            "groupId":     groupId,
+            "authorId":    authorId,
+            "authorName":  authorName,
+            "title":       title,
             "description": description,
-            "tag": tag,
-            "upvotes": [],
+            "tag":         tag,
+            "upvotes":     [],
             "answerCount": 0,
             "bestAnswerId": NSNull(),
-            "createdAt": Timestamp(date: Date()),
-            "status": "unanswered"
+            "createdAt":   Timestamp(date: Date()),
+            "status":      "unanswered"
         ]
         try await db
             .collection("studyGroups")
@@ -790,15 +840,12 @@ class FirestoreService {
             .document(questionId)
             .setData(data)
 
-        // Award +10 points for posting question
         try await awardPoints(uid: authorId, points: 10)
-
-        // Log activity
         try await logActivity(
             groupId: groupId,
             actorId: authorId,
-            action: "posted a question",
-            type: "qna"
+            action:  "posted a question",
+            type:    "qna"
         )
     }
 
@@ -814,18 +861,20 @@ class FirestoreService {
         return snap.documents.compactMap { try? $0.data(as: Answer.self) }
     }
 
-    func postAnswer(groupId: String, questionId: String, authorId: String,
-                    authorName: String, body: String) async throws {
+    func postAnswer(
+        groupId: String, questionId: String,
+        authorId: String, authorName: String, body: String
+    ) async throws {
         let answerId = UUID().uuidString
         let data: [String: Any] = [
-            "answerId": answerId,
-            "questionId": questionId,
-            "authorId": authorId,
-            "authorName": authorName,
-            "body": body,
-            "upvotes": [],
+            "answerId":    answerId,
+            "questionId":  questionId,
+            "authorId":    authorId,
+            "authorName":  authorName,
+            "body":        body,
+            "upvotes":     [],
             "isBestAnswer": false,
-            "createdAt": Timestamp(date: Date())
+            "createdAt":   Timestamp(date: Date())
         ]
         try await db
             .collection("studyGroups")
@@ -836,7 +885,6 @@ class FirestoreService {
             .document(answerId)
             .setData(data)
 
-        // Update answer count
         try await db
             .collection("studyGroups")
             .document(groupId)
@@ -844,16 +892,25 @@ class FirestoreService {
             .document(questionId)
             .updateData([
                 "answerCount": FieldValue.increment(Int64(1)),
-                "status": "answered"
+                "status":      "answered"
             ])
 
-        // Award +15 points for answering
         try await awardPoints(uid: authorId, points: 15)
+
+        // Log Q&A answer for progress tracking
+        Task {
+            try? await StudyProgressService.shared.logAnswer(
+                uid:      authorId,
+                groupId:  groupId,
+                username: authorName
+            )
+        }
     }
 
-    func markBestAnswer(groupId: String, questionId: String,
-                        answerId: String, authorId: String) async throws {
-        // Unmark previous best answer if any
+    func markBestAnswer(
+        groupId: String, questionId: String,
+        answerId: String, authorId: String, authorName: String
+    ) async throws {
         let answers = try await fetchAnswers(groupId: groupId, questionId: questionId)
         for answer in answers where answer.isBestAnswer {
             try await db
@@ -866,7 +923,6 @@ class FirestoreService {
                 .updateData(["isBestAnswer": false])
         }
 
-        // Mark new best answer
         try await db
             .collection("studyGroups")
             .document(groupId)
@@ -876,7 +932,6 @@ class FirestoreService {
             .document(answerId)
             .updateData(["isBestAnswer": true])
 
-        // Update question
         try await db
             .collection("studyGroups")
             .document(groupId)
@@ -884,12 +939,22 @@ class FirestoreService {
             .document(questionId)
             .updateData(["bestAnswerId": answerId])
 
-        // Award +25 points bonus
         try await awardPoints(uid: authorId, points: 25)
+
+        // Log best answer for progress tracking
+        Task {
+            try? await StudyProgressService.shared.logBestAnswer(
+                uid:      authorId,
+                groupId:  groupId,
+                username: authorName
+            )
+        }
     }
 
-    func toggleQuestionUpvote(groupId: String, questionId: String,
-                              uid: String, isUpvoted: Bool) async throws {
+    func toggleQuestionUpvote(
+        groupId: String, questionId: String,
+        uid: String, isUpvoted: Bool
+    ) async throws {
         try await db
             .collection("studyGroups")
             .document(groupId)
@@ -902,8 +967,10 @@ class FirestoreService {
             ])
     }
 
-    func toggleAnswerUpvote(groupId: String, questionId: String,
-                            answerId: String, uid: String, isUpvoted: Bool) async throws {
+    func toggleAnswerUpvote(
+        groupId: String, questionId: String,
+        answerId: String, uid: String, isUpvoted: Bool
+    ) async throws {
         try await db
             .collection("studyGroups")
             .document(groupId)
@@ -924,7 +991,7 @@ class FirestoreService {
             .document(uid)
             .updateData(["points": FieldValue.increment(Int64(points))])
     }
-    
+
     // -----------------------------------------------
     // MARK: - Polls
     // -----------------------------------------------
@@ -947,13 +1014,12 @@ class FirestoreService {
         options:      [String],
         correctIndex: Int,
         duration:     Int,
-        allowMultiple : Bool = false,
-        isAnonymous : Bool = false
-        
+        allowMultiple: Bool = false,
+        isAnonymous:   Bool = false
     ) async throws {
-        let pollId  = UUID().uuidString
-        let endsAt  = Date().addingTimeInterval(Double(duration) * 3600)
-        let pollOptions = options.enumerated().map { index, text in
+        let pollId      = UUID().uuidString
+        let endsAt      = Date().addingTimeInterval(Double(duration) * 3600)
+        let pollOptions = options.map { text in
             ["id": UUID().uuidString, "text": text, "voteCount": 0]
         }
 
@@ -982,7 +1048,6 @@ class FirestoreService {
             .setData(data)
 
         try await awardPoints(uid: authorId, points: 15)
-
         try await logActivity(
             groupId: groupId,
             actorId: authorId,
@@ -991,11 +1056,15 @@ class FirestoreService {
         )
     }
 
-    func vote(groupId: String, pollId: String, optionIndex: Int, uid: String) async throws {
+    func vote(
+        groupId: String, pollId: String,
+        optionIndex: Int, uid: String,
+        username: String, correctIndex: Int
+    ) async throws {
         let voteData: [String: Any] = [
-            "uid":        uid,
+            "uid":         uid,
             "optionIndex": optionIndex,
-            "votedAt":    Timestamp(date: Date())
+            "votedAt":     Timestamp(date: Date())
         ]
 
         try await db
@@ -1007,7 +1076,6 @@ class FirestoreService {
             .document(uid)
             .setData(voteData)
 
-        // Increment option voteCount
         let pollRef = db
             .collection("studyGroups")
             .document(groupId)
@@ -1016,7 +1084,8 @@ class FirestoreService {
 
         let snap = try await pollRef.getDocument()
         if var options = snap.data()?["options"] as? [[String: Any]] {
-            options[optionIndex]["voteCount"] = (options[optionIndex]["voteCount"] as? Int ?? 0) + 1
+            options[optionIndex]["voteCount"] =
+                (options[optionIndex]["voteCount"] as? Int ?? 0) + 1
             try await pollRef.updateData([
                 "options":    options,
                 "totalVotes": FieldValue.increment(Int64(1))
@@ -1024,6 +1093,17 @@ class FirestoreService {
         }
 
         try await awardPoints(uid: uid, points: 8)
+
+        // Log poll vote for progress tracking
+        let isCorrect = optionIndex == correctIndex
+        Task {
+            try? await StudyProgressService.shared.logPollVote(
+                uid:       uid,
+                groupId:   groupId,
+                username:  username,
+                isCorrect: isCorrect
+            )
+        }
     }
 
     func fetchUserVote(groupId: String, pollId: String, uid: String) async throws -> Int? {
@@ -1035,7 +1115,6 @@ class FirestoreService {
             .collection("votes")
             .document(uid)
             .getDocument()
-
         return snap.data()?["optionIndex"] as? Int
     }
 
@@ -1047,11 +1126,11 @@ class FirestoreService {
             .document(pollId)
             .updateData(["status": "closed"])
     }
-    
+
     // -----------------------------------------------
     // MARK: - Resource - Activity
     // -----------------------------------------------
-    
+
     func fetchFavouriteResources() async throws -> [Resource] {
         guard let uid = Auth.auth().currentUser?.uid else { return [] }
         let groups = try await fetchMyGroups()
@@ -1090,7 +1169,6 @@ class FirestoreService {
 
     // Expose db for ViewModel
     var db_public: Firestore { db }
-
 }
 
 // -----------------------------------------------

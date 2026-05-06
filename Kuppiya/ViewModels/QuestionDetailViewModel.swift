@@ -66,7 +66,8 @@ class QuestionDetailViewModel: ObservableObject {
                 groupId:    groupId,
                 questionId: questionId,
                 answerId:   answer.answerId,
-                authorId:   answer.authorId
+                authorId:   answer.authorId,
+                authorName: answer.authorName
             )
             await load(groupId: groupId, questionId: questionId)
         } catch {
