@@ -24,6 +24,8 @@ struct Poll: Identifiable, Codable, Hashable {
     var options:      [PollOption]
     var correctIndex: Int
     var duration:     Int
+    var allowMultiple: Bool = false
+    var isAnonymous:   Bool = false
     var endsAt:       Date
     var status:       String
     var createdAt:    Date

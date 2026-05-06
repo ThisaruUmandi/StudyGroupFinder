@@ -946,7 +946,10 @@ class FirestoreService {
         question:     String,
         options:      [String],
         correctIndex: Int,
-        duration:     Int
+        duration:     Int,
+        allowMultiple : Bool = false,
+        isAnonymous : Bool = false
+        
     ) async throws {
         let pollId  = UUID().uuidString
         let endsAt  = Date().addingTimeInterval(Double(duration) * 3600)
@@ -963,6 +966,8 @@ class FirestoreService {
             "options":      pollOptions,
             "correctIndex": correctIndex,
             "duration":     duration,
+            "allowMultiple": allowMultiple,
+            "isAnonymous":   isAnonymous,
             "endsAt":       Timestamp(date: endsAt),
             "status":       "active",
             "createdAt":    Timestamp(date: Date()),
