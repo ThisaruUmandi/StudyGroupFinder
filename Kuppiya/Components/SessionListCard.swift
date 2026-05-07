@@ -13,7 +13,9 @@ struct SessionListCard: View {
     let onTap: () -> Void
 
     private var cardBg: Color {
-        session.isOnline ? Color(hex: "#FFF8E8") : Color(hex: "#E8F5EE")
+        session.isOnline
+            ? Color(hex: "#BA7517").opacity(0.12)
+            : Color(hex: "#1D9E75").opacity(0.12)
     }
 
     private var tagColor: Color {

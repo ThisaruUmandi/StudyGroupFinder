@@ -56,7 +56,7 @@ struct CustomTextField: View {
         }
         .padding(.horizontal, 16)
         .frame(height: 55)
-        .background(Color.white)
+        .background(Color(.systemGroupedBackground))
         .overlay(
             RoundedRectangle(cornerRadius: 30)
                 .stroke(Color.gray.opacity(0.4), lineWidth: 1)

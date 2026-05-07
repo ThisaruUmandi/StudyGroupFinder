@@ -40,7 +40,7 @@ struct CreateGroupView: View {
                 }
             }
         }
-        .background(Color.white.ignoresSafeArea())
+        .background(Color(.systemBackground).ignoresSafeArea())
         .sheet(isPresented: $viewModel.showAddMembers) {
             AddMembersView(selectedMembers: $viewModel.selectedMembers)
         }
@@ -75,7 +75,7 @@ struct CreateGroupView: View {
                 
                 Text("Create a New Group")
                     .font(.system(size: 30, weight: .bold))
-                    .foregroundColor(.black)
+                    .foregroundColor(.primary)
 //                    .padding(.leading,30)
 //                    .padding(.top, -20)
             }
@@ -92,7 +92,7 @@ struct CreateGroupView: View {
         .padding(.horizontal, 20)
         .padding(.top, 16)
         .padding(.bottom, 12)
-        .background(Color.white)
+        .background(Color(.systemBackground))
     }
 
     // MARK: - Section label
@@ -150,9 +150,9 @@ struct CreateGroupView: View {
                 isMultiline: true
             )
         }
-        .background(Color.white)
+        .background(Color(.systemBackground))
         .cornerRadius(16)
-        .shadow(color: .black.opacity(0.04), radius: 8, x: 0, y: 2)
+        .shadow(color: .primary.opacity(0.04), radius: 8, x: 0, y: 2)
         .padding(.horizontal, 20)
     }
 
@@ -217,9 +217,9 @@ struct CreateGroupView: View {
             .padding(.horizontal, 16)
             .padding(.vertical, 14)
         }
-        .background(Color.white)
+        .background(Color(.systemBackground))
         .cornerRadius(16)
-        .shadow(color: .black.opacity(0.04), radius: 8, x: 0, y: 2)
+        .shadow(color: .primary.opacity(0.04), radius: 8, x: 0, y: 2)
         .padding(.horizontal, 20)
     }
 
@@ -287,9 +287,9 @@ struct CreateGroupView: View {
                         .foregroundColor(Color(hex: "0300BF"))
                 }
                 .padding(12)
-                .background(Color.white)
+                .background(Color(.systemBackground))
                 .cornerRadius(10)
-                .shadow(color: .black.opacity(0.04), radius: 6)
+                .shadow(color: .primary.opacity(0.04), radius: 6)
                 .padding(.horizontal, 20)
             }
         }
@@ -361,13 +361,13 @@ private struct MemberChip: View {
         VStack(spacing: 6) {
             ZStack(alignment: .topTrailing) {
                 KUserAvatar(imageURL: imageURL, name: name, size: 56)
-                    .overlay(Circle().stroke(Color.white, lineWidth: 2))
+                    .overlay(Circle().stroke(Color(.systemBackground), lineWidth: 2))
                 if canRemove {
                     Button(action: onRemove) {
                         Image(systemName: "xmark.circle.fill")
                             .font(.system(size: 17))
                             .foregroundColor(Color(.systemGray3))
-                            .background(Color.white, in: Circle())
+                            .background(Color(.systemBackground), in: Circle())
                     }
                     .offset(x: 4, y: -4)
                 }
@@ -383,9 +383,9 @@ private struct MemberChip: View {
         .frame(width: 74)
         .padding(.vertical, 10)
         .padding(.horizontal, 6)
-        .background(Color.white)
+        .background(Color(.systemBackground))
         .cornerRadius(14)
-        .shadow(color: .black.opacity(0.06), radius: 6, x: 0, y: 2)
+        .shadow(color: .primary.opacity(0.06), radius: 6, x: 0, y: 2)
     }
 }
 
@@ -421,9 +421,9 @@ private struct DashedActionButton: View {
             .frame(width: 74)
             .padding(.vertical, 10)
             .padding(.horizontal, 6)
-            .background(Color.white)
+            .background(Color(.systemBackground))
             .cornerRadius(14)
-            .shadow(color: .black.opacity(0.06), radius: 6, x: 0, y: 2)
+            .shadow(color: .primary.opacity(0.06), radius: 6, x: 0, y: 2)
         }
         .buttonStyle(.plain)
     }

@@ -62,11 +62,11 @@ class PollViewModel: ObservableObject {
     func vote(poll: Poll, optionIndex: Int, groupId: String) async {
         do {
             try await service.vote(
-                groupId:     groupId,
-                pollId:      poll.pollId,
+                groupId: groupId,
+                pollId: poll.pollId,
                 optionIndex: optionIndex,
-                uid:         currentUid,
-                username:    Auth.auth().currentUser?.displayName ?? "Unknown",
+                uid: currentUid,
+                username: Auth.auth().currentUser?.displayName ?? "Unknown",
                 correctIndex: poll.correctIndex
             )
             userVotes[poll.pollId] = optionIndex

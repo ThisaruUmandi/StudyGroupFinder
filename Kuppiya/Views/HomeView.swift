@@ -20,12 +20,12 @@ struct HomeView: View {
     var body: some View {
         NavigationStack {
             ZStack(alignment: .top) {
-                Color.white.ignoresSafeArea()
+                Color(.systemBackground).ignoresSafeArea()
 
                 VStack(spacing: 0) {
                     // Fixed header — does not scroll
                     HomeHeaderView(user: authVM.currentUser)
-                        .background(Color.white)
+                        .background(Color(.systemBackground))
 
                     if viewModel.isLoading {
                         Spacer()
@@ -252,7 +252,7 @@ struct HomeGreetingView: View {
 struct HomeSectionHeader: View {
     let title: String
     var badge: String?          = nil
-    var badgeBg: Color          = Color(hex: "#FAEEDA")
+    var badgeBg: Color          = Color(hex: "#BA7517").opacity(0.15)
     var badgeTextColor: Color   = Color(hex: "#BA7517")
     var actionTitle: String?    = nil
     var onAction: (() -> Void)? = nil
@@ -261,7 +261,7 @@ struct HomeSectionHeader: View {
         HStack {
             Text(title)
                 .font(.system(size: 17, weight: .bold))
-                .foregroundColor(.black)
+                .foregroundColor(.primary)
 
             if let badge {
                 Text(badge)
@@ -277,7 +277,7 @@ struct HomeSectionHeader: View {
                 Button(action: onAction) {
                     Text(actionTitle)
                         .font(.system(size: 13))
-                        .foregroundColor(Color(hex: "#0300BF"))
+                        .foregroundColor(.brandPrimary)
                 }
             }
         }

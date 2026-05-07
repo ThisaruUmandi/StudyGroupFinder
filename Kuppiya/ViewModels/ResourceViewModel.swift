@@ -12,10 +12,10 @@ import Combine
 @MainActor
 class ResourceViewModel: ObservableObject {
     @Published var resources: [Resource] = []
-    @Published var isLoading             = false
-    @Published var showError             = false
-    @Published var errorMessage          = ""
-    @Published var selectedFilter        = "All"
+    @Published var isLoading = false
+    @Published var showError = false
+    @Published var errorMessage = ""
+    @Published var selectedFilter = "All"
 
     private let service = FirestoreService.shared
 
@@ -24,9 +24,9 @@ class ResourceViewModel: ObservableObject {
     var filtered: [Resource] {
         switch selectedFilter {
         case "Documents": return resources.filter { $0.isDocument }
-        case "Media":     return resources.filter { $0.isMedia }
-        case "Links":     return resources.filter { $0.isLink }
-        default:          return resources
+        case "Media": return resources.filter { $0.isMedia }
+        case "Links": return resources.filter { $0.isLink }
+        default: return resources
         }
     }
 
@@ -36,7 +36,7 @@ class ResourceViewModel: ObservableObject {
             resources = try await service.fetchResources(for: groupId)
         } catch {
             errorMessage = error.localizedDescription
-            showError    = true
+            showError = true
         }
         isLoading = false
     }
@@ -59,7 +59,7 @@ class ResourceViewModel: ObservableObject {
             resources.removeAll { $0.resourceId == resource.resourceId }
         } catch {
             errorMessage = error.localizedDescription
-            showError    = true
+            showError = true
         }
     }
 }

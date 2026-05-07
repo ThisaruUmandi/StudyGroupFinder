@@ -33,24 +33,24 @@ struct PersonalInfoView: View {
 
                 VStack(spacing: 0) {
                     SettingsFormField(
-                        icon:      "person.fill",
+                        icon: "person.fill",
                         iconColor: Color(hex: "#0300BF"),
-                        iconBg:    Color(hex: "#EEEEFF"),
-                        label:     "USERNAME",
-                        text:      $username
+                        iconBg: Color(hex: "#EEEEFF"),
+                        label: "USERNAME",
+                        text: $username
                     )
                     Divider().padding(.leading, 72)
                     SettingsFormField(
-                        icon:      "envelope.fill",
+                        icon: "envelope.fill",
                         iconColor: Color(hex: "#1D9E75"),
-                        iconBg:    Color(hex: "#E0F5EE"),
-                        label:     "EMAIL",
-                        text:      $email
+                        iconBg: Color(hex: "#E0F5EE"),
+                        label: "EMAIL",
+                        text: $email
                     )
                 }
-                .background(Color.white)
+                .background(Color(.systemBackground))
                 .cornerRadius(14)
-                .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 3)
+                .shadow(color: .primary.opacity(0.05), radius: 8, x: 0, y: 3)
                 .padding(.horizontal, 20)
                 .padding(.bottom, 32)
 
@@ -60,7 +60,7 @@ struct PersonalInfoView: View {
                 } label: {
                     Text("Save Changes")
                         .font(.system(size: 16, weight: .bold))
-                        .foregroundColor(.white)
+                        .foregroundColor(Color(uiColor: .systemBackground))
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 16)
                         .background(
@@ -114,7 +114,7 @@ struct PersonalInfoView: View {
                     .frame(width: 36, height: 36)
                     .background(Color(UIColor.systemBackground))
                     .clipShape(Circle())
-                    .shadow(color: .black.opacity(0.06), radius: 4, x: 0, y: 2)
+                    .shadow(color: .primary.opacity(0.06), radius: 4, x: 0, y: 2)
             }
             Spacer()
             Text("Personal Info")
@@ -137,17 +137,17 @@ struct PersonalInfoView: View {
 #Preview {
     let vm  = ProfileViewModel()
     vm.user = AppUser(
-        id:           "1",
-        uid:          "uid1",
-        username:     "Kaveen De Silva",
-        email:        "kaveen@gmail.com",
+        id: "1",
+        uid: "uid1",
+        username: "Kaveen De Silva",
+        email: "kaveen@gmail.com",
         profileImage: "",
-        university:   "NIBM",
-        major:        "Computer Science",
+        university: "NIBM",
+        major: "Computer Science",
         joinedGroups: ["g1", "g2"],
-        interests:    ["iOS", "Swift"],
-        createdAt:    Date(),
-        fcmToken:     ""
+        interests: ["iOS", "Swift"],
+        createdAt: Date(),
+        fcmToken: ""
     )
     return NavigationStack {
         PersonalInfoView(vm: vm)

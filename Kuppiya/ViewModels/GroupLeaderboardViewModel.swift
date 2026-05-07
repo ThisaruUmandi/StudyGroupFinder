@@ -10,11 +10,11 @@ import Combine
 
 @MainActor
 class GroupLeaderboardViewModel: ObservableObject {
-    @Published var entries:      [LeaderboardEntry] = []
-    @Published var selectedTab   = 0   // 0 = All time, 1 = This week
-    @Published var isLoading     = false
-    @Published var showError     = false
-    @Published var errorMessage  = ""
+    @Published var entries: [LeaderboardEntry] = []
+    @Published var selectedTab = 0   // 0 = All time, 1 = This week
+    @Published var isLoading = false
+    @Published var showError = false
+    @Published var errorMessage = ""
 
     private let service = StudyProgressService.shared
 
@@ -30,11 +30,11 @@ class GroupLeaderboardViewModel: ObservableObject {
         do {
             entries = try await service.fetchGroupLeaderboard(
                 groupId: groupId,
-                weekly:  selectedTab == 1
+                weekly: selectedTab == 1
             )
         } catch {
             errorMessage = error.localizedDescription
-            showError    = true
+            showError = true
         }
     }
 }

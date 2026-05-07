@@ -8,11 +8,11 @@
 import SwiftUI
 
 struct KPollCard: View {
-    let poll:       Poll
-    let userVote:   Int?
+    let poll: Poll
+    let userVote: Int?
     let currentUid: String
-    let onVote:     (Int) -> Void
-    let onClose:    () -> Void
+    let onVote: (Int) -> Void
+    let onClose: () -> Void
 
     var hasVoted: Bool { userVote != nil }
     var isAuthor: Bool { poll.authorId == currentUid }
@@ -44,7 +44,7 @@ struct KPollCard: View {
                 .padding(.horizontal, 16)
                 .padding(.vertical, 10)
         }
-        .background(Color.white)
+        .background(Color(UIColor.systemBackground))
         .cornerRadius(18)
         .shadow(color: .black.opacity(0.06), radius: 12, x: 0, y: 4)
     }
@@ -150,7 +150,7 @@ struct KPollCard: View {
 
         let fillColor: Color = {
             if isCorrect { return Color(hex: "#1D9E75") }
-            if isWrong   { return Color(hex: "#E84040") }
+            if isWrong { return Color(hex: "#E84040") }
             return Color(.systemGray4)
         }()
 
@@ -181,17 +181,17 @@ struct KPollCard: View {
                     if isCorrect {
                         Image(systemName: poll.allowMultiple ? "trophy.fill" : "checkmark")
                             .font(.system(size: 11, weight: .bold))
-                            .foregroundColor(.white)
+                            .foregroundColor(Color(UIColor.systemBackground))
                             .frame(width: 20, height: 20)
-                            .background(Color.white.opacity(0.25))
+                            .background(Color(UIColor.systemBackground).opacity(0.25))
                             .clipShape(Circle())
                             .padding(.leading, 10)
                     } else if isWrong {
                         Image(systemName: "xmark")
                             .font(.system(size: 11, weight: .bold))
-                            .foregroundColor(.white)
+                            .foregroundColor(Color(UIColor.systemBackground))
                             .frame(width: 20, height: 20)
-                            .background(Color.white.opacity(0.25))
+                            .background(Color(UIColor.systemBackground).opacity(0.25))
                             .clipShape(Circle())
                             .padding(.leading, 10)
                     } else {

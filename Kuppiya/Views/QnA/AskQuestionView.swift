@@ -78,9 +78,9 @@ struct AskQuestionView: View {
                         isMultiline: true
                     )
                 }
-                .background(Color.white)
+                .background(Color(.systemBackground))
                 .cornerRadius(14)
-                .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 3)
+                .shadow(color: .primary.opacity(0.05), radius: 8, x: 0, y: 3)
                 .padding(.top, 8)
 
                 // Post button
@@ -101,7 +101,7 @@ struct AskQuestionView: View {
                                 .font(.system(size: 16, weight: .bold))
                         }
                     }
-                    .foregroundColor(.white)
+                    .foregroundColor(Color(uiColor: .systemBackground))
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 16)
                     .background(
@@ -138,7 +138,7 @@ struct AskQuestionView: View {
                     .frame(width: 36, height: 36)
                     .background(Color(UIColor.systemBackground))
                     .clipShape(Circle())
-                    .shadow(color: .black.opacity(0.06), radius: 4, x: 0, y: 2)
+                    .shadow(color: .primary.opacity(0.06), radius: 4, x: 0, y: 2)
             }
             Spacer()
             Text("Ask a Question")
@@ -160,16 +160,16 @@ struct AskQuestionView: View {
 #Preview {
     NavigationStack {
         AskQuestionView(group: StudyGroup(
-            groupId:     "g1",
-            name:        "iOS Dev",
-            subject:     "iOS Development",
-            major:       "Computer Science",
+            groupId: "g1",
+            name: "iOS Dev",
+            subject: "iOS Development",
+            major: "Computer Science",
             description: "Test group",
-            createdBy:   "uid1",
-            members:     ["uid1"],
-            privacy:     "public",
-            university:  "NIBM",
-            createdAt:   Date()
+            createdBy: "uid1",
+            members: ["uid1"],
+            privacy: "public",
+            university: "NIBM",
+            createdAt: Date()
         ))
         .environmentObject(AuthViewModel())
         .environmentObject(TabBarViewModel())

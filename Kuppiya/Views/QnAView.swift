@@ -20,7 +20,7 @@ struct QnAView: View {
 
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
-            Color.white
+            Color(.systemBackground)
 
             VStack(spacing: 0) {
                 navBar
@@ -74,7 +74,7 @@ struct QnAView: View {
                     .font(.system(size: 15, weight: .semibold))
                     .foregroundColor(.primary)
                     .frame(width: 36, height: 36)
-                    .background(Color.white)
+                    .background(Color(.systemBackground))
                     .clipShape(Circle())
                     .shadow(color: .black.opacity(0.06), radius: 4, x: 0, y: 2)
             }
@@ -108,7 +108,7 @@ struct QnAView: View {
                             .background(
                                 vm.selectedFilter == index
                                     ? Color(hex: "#0300BF")
-                                    : Color.white
+                                    : Color(.systemBackground)
                             )
                             .clipShape(Capsule())
                             .shadow(color: .black.opacity(0.06), radius: 4, x: 0, y: 2)

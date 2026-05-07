@@ -9,8 +9,8 @@ import SwiftUI
 
 struct KGroupAvatar: View {
     var imageURL: String? = nil
-    var name: String      = ""
-    var size: CGFloat     = 46
+    var name: String = ""
+    var size: CGFloat = 46
 
     var body: some View {
         ZStack {

@@ -14,14 +14,12 @@ struct KSearchBar: View {
     var body: some View {
         HStack(spacing: 10) {
             Image(systemName: "magnifyingglass")
-                .foregroundColor(Color(hex: "#0300BF"))
-                //.foregroundColor(Color.gray.opacity(0.5))
+                .foregroundColor(.brandPrimary)
                 .font(.system(size: 16))
 
             TextField(placeholder, text: $text)
                 .font(.system(size: 14))
                 .autocorrectionDisabled()
-                .foregroundColor(Color(hex: "#0300BF"))
 
             Spacer()
 
@@ -29,18 +27,17 @@ struct KSearchBar: View {
                 // mic action
             } label: {
                 Image(systemName: "mic.fill")
-                    .foregroundColor(Color(hex: "#0300BF"))
-                    //.foregroundColor(Color.gray.opacity(0.6))
+                    .foregroundColor(.brandPrimary)
                     .font(.system(size: 16))
             }
         }
         .padding(.horizontal, 16)
         .frame(height: 48)
-        .background(Color.white)
+        .background(Color(.systemBackground))
         .cornerRadius(24)
         .overlay(
-            RoundedRectangle(cornerRadius: 24)               .stroke(Color(hex: "#1A1ADB"), lineWidth: 1.5)
-                //.stroke(Color.gray.opacity(0.5), lineWidth: 1.5)
+            RoundedRectangle(cornerRadius: 24)
+                .stroke(Color.brandPrimary, lineWidth: 1.5)
         )
     }
 }

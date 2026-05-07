@@ -80,7 +80,7 @@ struct GroupProgressView: View {
                     .frame(width: 36, height: 36)
                     .background(Color(UIColor.systemBackground))
                     .clipShape(Circle())
-                    .shadow(color: .black.opacity(0.06), radius: 4, x: 0, y: 2)
+                    .shadow(color: .primary.opacity(0.06), radius: 4, x: 0, y: 2)
             }
             Spacer()
             Text("Progress")
@@ -94,7 +94,7 @@ struct GroupProgressView: View {
                         .frame(width: 36, height: 36)
                         .background(Color(UIColor.systemBackground))
                         .clipShape(Circle())
-                        .shadow(color: .black.opacity(0.06), radius: 4, x: 0, y: 2)
+                        .shadow(color: .primary.opacity(0.06), radius: 4, x: 0, y: 2)
                 }
             } else {
                 Color.clear.frame(width: 36, height: 36)
@@ -165,9 +165,9 @@ struct GroupProgressView: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 20)
-        .background(Color.white)
+        .background(Color(.systemBackground))
         .cornerRadius(16)
-        .shadow(color: .black.opacity(0.04), radius: 8, x: 0, y: 2)
+        .shadow(color: .primary.opacity(0.04), radius: 8, x: 0, y: 2)
     }
 
     // MARK: - Weekly Goal Card
@@ -200,9 +200,9 @@ struct GroupProgressView: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 16)
-        .background(Color.white)
+        .background(Color(.systemBackground))
         .cornerRadius(16)
-        .shadow(color: .black.opacity(0.04), radius: 8, x: 0, y: 2)
+        .shadow(color: .primary.opacity(0.04), radius: 8, x: 0, y: 2)
     }
 
     // MARK: - Points Card
@@ -224,9 +224,9 @@ struct GroupProgressView: View {
             }
         }
         .padding(16)
-        .background(Color.white)
+        .background(Color(.systemBackground))
         .cornerRadius(16)
-        .shadow(color: .black.opacity(0.04), radius: 8, x: 0, y: 2)
+        .shadow(color: .primary.opacity(0.04), radius: 8, x: 0, y: 2)
     }
 
     private func pointsPillar(label: String, value: Int, color: Color) -> some View {
@@ -272,9 +272,9 @@ struct GroupProgressView: View {
             }
         }
         .padding(16)
-        .background(Color.white)
+        .background(Color(.systemBackground))
         .cornerRadius(16)
-        .shadow(color: .black.opacity(0.04), radius: 8, x: 0, y: 2)
+        .shadow(color: .primary.opacity(0.04), radius: 8, x: 0, y: 2)
     }
 
     private func statItem(
@@ -326,9 +326,9 @@ struct GroupProgressView: View {
             .frame(height: 80)
         }
         .padding(16)
-        .background(Color.white)
+        .background(Color(.systemBackground))
         .cornerRadius(16)
-        .shadow(color: .black.opacity(0.04), radius: 8, x: 0, y: 2)
+        .shadow(color: .primary.opacity(0.04), radius: 8, x: 0, y: 2)
     }
 
     // MARK: - Performance Card
@@ -354,9 +354,9 @@ struct GroupProgressView: View {
             }
         }
         .padding(16)
-        .background(Color.white)
+        .background(Color(.systemBackground))
         .cornerRadius(16)
-        .shadow(color: .black.opacity(0.04), radius: 8, x: 0, y: 2)
+        .shadow(color: .primary.opacity(0.04), radius: 8, x: 0, y: 2)
     }
 
     private func performanceRow(
@@ -441,9 +441,9 @@ struct GroupProgressView: View {
                 }
             }
         }
-        .background(Color.white)
+        .background(Color(.systemBackground))
         .cornerRadius(16)
-        .shadow(color: .black.opacity(0.04), radius: 8, x: 0, y: 2)
+        .shadow(color: .primary.opacity(0.04), radius: 8, x: 0, y: 2)
     }
 
     private func rankRow(_ entry: LeaderboardEntry) -> some View {

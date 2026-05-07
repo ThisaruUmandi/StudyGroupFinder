@@ -28,11 +28,11 @@ struct ActivityView: View {
                 contentArea.padding(.top, 16)
             }
 
-            Image("oboy_l")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 70)
-                .offset(y: -90)
+//            Image("oboy_l")
+//                .resizable()
+//                .scaledToFit()
+//                .frame(width: 70)
+//                .offset(y: -90)
         }
         .navigationBarHidden(true)
         .onAppear { Task { await vm.loadAll() } }
@@ -111,7 +111,7 @@ struct ActivityView: View {
             Text("You're offline. Downloads & Summaries available.")
                 .font(.system(size: 12, weight: .medium))
         }
-        .foregroundColor(.white)
+        .foregroundColor(Color(uiColor: .systemBackground))
         .padding(.horizontal, 16)
         .padding(.vertical, 10)
         .frame(maxWidth: .infinity)
@@ -141,16 +141,23 @@ struct ActivityView: View {
                     } label: {
                         Text(vm.tabs[index])
                             .font(.system(size: 13, weight: .semibold))
-                            .foregroundColor(vm.selectedTab == index ? .white : .primary)
+                            .foregroundColor(
+                                vm.selectedTab == index
+                                ? .white
+                                : .primary
+                            )
                             .padding(.horizontal, 16)
                             .padding(.vertical, 8)
                             .background(
                                 vm.selectedTab == index
                                     ? Color(hex: "#0300BF")
-                                    : Color.white
+                                    : Color(.systemBackground)
                             )
-                            .clipShape(Capsule())
-                            .shadow(color: .black.opacity(0.06), radius: 4, x: 0, y: 2)
+                            .clipShape(Capsule()).overlay {
+                                RoundedRectangle(cornerRadius: 12)
+                                .stroke(Color.gray.opacity(0.4), lineWidth: 0.5)
+                            }
+                            .shadow(color: .primary.opacity(0.06), radius: 4, x: 0, y: 2)
                     }
                 }
             }
@@ -171,9 +178,13 @@ struct ActivityView: View {
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 11)
-        .background(Color.white)
+        .background(Color(.systemBackground))
         .cornerRadius(25)
-        .shadow(color: .black.opacity(0.05), radius: 6, x: 0, y: 2)
+        .shadow(color: .primary.opacity(0.05), radius: 6, x: 0, y: 2)
+        .overlay {
+            RoundedRectangle(cornerRadius: 50)
+            .stroke(Color.gray.opacity(0.4), lineWidth: 0.5)
+        }
     }
 
     // MARK: - Content
@@ -248,9 +259,9 @@ struct ActivityView: View {
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
-        .background(Color.white)
+        .background(Color(.systemBackground))
         .cornerRadius(14)
-        .shadow(color: .black.opacity(0.04), radius: 6, x: 0, y: 2)
+        .shadow(color: .primary.opacity(0.04), radius: 6, x: 0, y: 2)
         .onTapGesture {
             vm.openFile(url: url)
         }
@@ -410,9 +421,9 @@ struct ActivityView: View {
             .cornerRadius(12)
         }
         .padding(14)
-        .background(Color.white)
+        .background(Color(.systemBackground))
         .cornerRadius(16)
-        .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 3)
+        .shadow(color: .primary.opacity(0.05), radius: 8, x: 0, y: 3)
     }
 
     // MARK: - Empty States

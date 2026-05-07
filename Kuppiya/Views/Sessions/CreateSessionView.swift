@@ -49,7 +49,7 @@ struct CreateSessionView: View {
             .padding(.horizontal, 20)
             .padding(.top, 16)
         }
-        .background(Color.white.ignoresSafeArea())
+        .background(Color(.systemBackground).ignoresSafeArea())
         .navigationBarHidden(true)
         .sheet(isPresented: $showLocationPicker) {
             LocationPickerView(
@@ -113,9 +113,9 @@ struct CreateSessionView: View {
                 text: $vm.description
             )
         }
-        .background(Color.white)
+        .background(Color(.systemBackground))
         .cornerRadius(14)
-        .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 3)
+        .shadow(color: .primary.opacity(0.05), radius: 8, x: 0, y: 3)
     }
 
     private var linkCard: some View {
@@ -127,9 +127,9 @@ struct CreateSessionView: View {
             placeholder: "e.g. paste your meeting link here...",
             text: $vm.joinLink
         )
-        .background(Color.white)
+        .background(Color(.systemBackground))
         .cornerRadius(14)
-        .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 3)
+        .shadow(color: .primary.opacity(0.05), radius: 8, x: 0, y: 3)
     }
 
     private var locationCard: some View {
@@ -191,7 +191,7 @@ struct CreateSessionView: View {
                             .foregroundColor(.secondary)
                     }
                     .padding(14)
-                    .background(Color.white)
+                    .background(Color(.systemBackground))
                     .cornerRadius(12)
                 }
                 .buttonStyle(.plain)
@@ -221,9 +221,9 @@ struct CreateSessionView: View {
             }
             .padding(14)
             .frame(maxWidth: .infinity)
-            .background(Color.white)
+            .background(Color(.systemBackground))
             .cornerRadius(12)
-            .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 3)
+            .shadow(color: .primary.opacity(0.05), radius: 8, x: 0, y: 3)
 
             VStack(alignment: .leading, spacing: 6) {
                 Text("START TIME")
@@ -245,9 +245,9 @@ struct CreateSessionView: View {
             }
             .padding(14)
             .frame(maxWidth: .infinity)
-            .background(Color.white)
+            .background(Color(.systemBackground))
             .cornerRadius(12)
-            .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 3)
+            .shadow(color: .primary.opacity(0.05), radius: 8, x: 0, y: 3)
         }
     }
 

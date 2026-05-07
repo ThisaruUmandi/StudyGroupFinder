@@ -13,10 +13,10 @@
 import SwiftUI
 
 struct KQuestionCard: View {
-    let question:   Question
+    let question: Question
     let currentUid: String
-    let onTap:      () -> Void
-    let onUpvote:   () -> Void
+    let onTap: () -> Void
+    let onUpvote: () -> Void
 
     var isUpvoted: Bool { question.upvotes.contains(currentUid) }
 
@@ -108,9 +108,13 @@ struct KQuestionCard: View {
                 }
             }
             .padding(16)
-            .background(Color.white)
+            .background(Color(UIColor.systemBackground))
             .cornerRadius(14)
             .shadow(color: .black.opacity(0.05), radius: 6, x: 0, y: 2)
+            .overlay {
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(Color(.systemGray4), lineWidth: 0.5)
+            }
         }
         .buttonStyle(.plain)
     }
@@ -119,18 +123,18 @@ struct KQuestionCard: View {
 #Preview {
     KQuestionCard(
         question: Question(
-            questionId:   "q1",
-            groupId:      "g1",
-            authorId:     "uid1",
-            authorName:   "Alex Chen",
-            title:        "What is the difference between struct and class in Swift?",
-            description:  "I'm confused about when to use struct vs class.",
-            tag:          "iOS",
-            upvotes:      ["uid2", "uid3"],
+            questionId: "q1",
+            groupId: "g1",
+            authorId: "uid1",
+            authorName: "Alex Chen",
+            title: "What is the difference between struct and class in Swift?",
+            description: "I'm confused about when to use struct vs class.",
+            tag: "iOS",
+            upvotes: ["uid2", "uid3"],
             answerCount:  3,
             bestAnswerId: nil,
-            createdAt:    Date(),
-            status:       "answered"
+            createdAt: Date(),
+            status: "answered"
         ),
         currentUid: "uid2"
     ) {} onUpvote: {}

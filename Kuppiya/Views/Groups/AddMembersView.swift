@@ -12,9 +12,9 @@ struct AddMembersView: View {
     @Environment(\.dismiss) private var dismiss
     @Binding var selectedMembers: [AppUser]
 
-    @State private var allUsers: [AppUser]    = []
-    @State private var searchText: String     = ""
-    @State private var isLoading: Bool        = false
+    @State private var allUsers: [AppUser] = []
+    @State private var searchText: String = ""
+    @State private var isLoading: Bool = false
 
     private let service = FirestoreService.shared
     private var currentUID: String {

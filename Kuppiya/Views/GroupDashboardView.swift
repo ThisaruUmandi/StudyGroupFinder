@@ -110,13 +110,13 @@ struct GroupDashboardView: View {
                         .font(.system(size: 17))
                         .foregroundColor(.secondary)
                         .frame(width: 34, height: 34)
-                        .background(Color.white.opacity(0.7))
+                        .background(Color(.systemBackground).opacity(0.7))
                         .clipShape(Circle())
                 }
             }
             .padding(.horizontal, 14)
             .padding(.vertical, 12)
-            .background(Color(hex: "#EDE7FF"))
+            .background(Color(hex: "#6B3FD4").opacity(0.1))
             .cornerRadius(16)
         }
         .padding(.horizontal, 20)
@@ -128,9 +128,11 @@ struct GroupDashboardView: View {
                 QuickActionCard(imageName: "session", label: "Sessions") {
                     navigateToSessions = true
                 }
+                
                 QuickActionCard(imageName: "chat", label: "Chat") {
                     navigateToChat = true
                 }
+                
                 QuickActionCard(imageName: "resource", label: "Resources") {
                     navigateToResources = true
                 }
@@ -139,14 +141,18 @@ struct GroupDashboardView: View {
                 QuickActionCard(imageName: "qna", label: "QnA") {
                     navigateToQnA = true
                 }
+                
                 QuickActionCard(imageName: "poll", label: "Polls") {
                     navigateToPolls = true
                 }
+                
                 QuickActionCard(imageName: "progress", label: "Progress") {
                     navigateToProgress = true
                 }
             }
+            
         }
+        
     }
 
     // Only shows when a session is currently happening
@@ -182,7 +188,7 @@ struct GroupDashboardView: View {
                         }
                     }
                     .font(.system(size: 13))
-                    .foregroundColor(Color(hex: "#0300BF"))
+                    .foregroundColor(.brandPrimary)
                 }
             }
             .padding(.horizontal, 20)
@@ -216,7 +222,7 @@ struct GroupDashboardView: View {
                 if !viewModel.activities.isEmpty {
                     Button("See All") { }
                         .font(.system(size: 13))
-                        .foregroundColor(Color(hex: "#0300BF"))
+                        .foregroundColor(.brandPrimary)
                 }
             }
             .padding(.horizontal, 20)

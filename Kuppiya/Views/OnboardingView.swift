@@ -16,7 +16,7 @@ struct OnboardingView: View {
 
     var body: some View {
         ZStack {
-            Color.white.ignoresSafeArea()
+            Color(.systemBackground).ignoresSafeArea()
 
             VStack(spacing: 0) {
 
@@ -54,16 +54,14 @@ struct OnboardingView: View {
                 VStack(spacing: 12) {
                     Text(viewModel.currentPage.title)
                         .font(.system(size: 40, weight: .bold))
-                        .foregroundColor(.black)
+                        .foregroundColor(.primary)
                         .multilineTextAlignment(.center)
                         .transition(.opacity)
                         .id("title_\(viewModel.currentPage.id)")
 
                     Text(viewModel.currentPage.subtitle)
                         .font(.system(size: 18, weight: .regular))
-                        .foregroundColor(Color(red: 0.45,
-                                               green: 0.45,
-                                               blue: 0.45))
+                        .foregroundColor(.secondary)
                         .multilineTextAlignment(.center)
                         .transition(.opacity)
                         .id("subtitle_\(viewModel.currentPage.id)")

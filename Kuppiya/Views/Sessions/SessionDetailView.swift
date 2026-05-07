@@ -56,7 +56,7 @@ struct SessionDetailView: View {
             .padding(.horizontal, 20)
             .padding(.top, 16)
         }
-        .background(Color.white.ignoresSafeArea())
+        .background(Color(.systemBackground).ignoresSafeArea())
         .navigationBarHidden(true)
         .sheet(isPresented: $showReviewSheet) {
             ReviewSheet(
@@ -171,9 +171,9 @@ struct SessionDetailView: View {
                 )
             }
         }
-        .background(Color.white)
+        .background(Color(.systemBackground))
         .cornerRadius(14)
-        .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 3)
+        .shadow(color: .primary.opacity(0.05), radius: 8, x: 0, y: 3)
     }
 
     // MARK: - Date & Time Card
@@ -195,9 +195,9 @@ struct SessionDetailView: View {
                 value: session.startTime
             )
         }
-        .background(Color.white)
+        .background(Color(.systemBackground))
         .cornerRadius(14)
-        .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 3)
+        .shadow(color: .primary.opacity(0.05), radius: 8, x: 0, y: 3)
     }
 
     // MARK: - Session Type Card
@@ -273,9 +273,9 @@ struct SessionDetailView: View {
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 14)
-        .background(Color.white)
+        .background(Color(.systemBackground))
         .cornerRadius(14)
-        .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 3)
+        .shadow(color: .primary.opacity(0.05), radius: 8, x: 0, y: 3)
     }
 
     // MARK: - Creation Detail Card
@@ -297,9 +297,9 @@ struct SessionDetailView: View {
                 value: vm.creatorName.isEmpty ? "Loading..." : vm.creatorName
             )
         }
-        .background(Color.white)
+        .background(Color(.systemBackground))
         .cornerRadius(14)
-        .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 3)
+        .shadow(color: .primary.opacity(0.05), radius: 8, x: 0, y: 3)
     }
 
     // MARK: - Review Card
@@ -328,9 +328,9 @@ struct SessionDetailView: View {
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 14)
-            .background(Color.white)
+            .background(Color(.systemBackground))
             .cornerRadius(14)
-            .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 3)
+            .shadow(color: .primary.opacity(0.05), radius: 8, x: 0, y: 3)
         }
         .buttonStyle(.plain)
     }
@@ -352,7 +352,7 @@ struct SessionDetailView: View {
                             .frame(width: 36, height: 36)
                         Text("+\(session.attendees.count - 4)")
                             .font(.system(size: 10, weight: .bold))
-                            .foregroundColor(.white)
+                            .foregroundColor(Color(uiColor: .systemBackground))
                     }
                     .offset(x: CGFloat(4) * 24)
                 }
@@ -370,9 +370,9 @@ struct SessionDetailView: View {
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 14)
-        .background(Color.white)
+        .background(Color(.systemBackground))
         .cornerRadius(14)
-        .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 3)
+        .shadow(color: .primary.opacity(0.05), radius: 8, x: 0, y: 3)
     }
 
     // MARK: - Action Buttons (upcoming + admin/creator only)
@@ -398,7 +398,7 @@ struct SessionDetailView: View {
 //            } label: {
 //                Text("Session Completed")
 //                    .font(.system(size: 16, weight: .semibold))
-//                    .foregroundColor(.white)
+//                    .foregroundColor((.systemBackground))
 //                    .frame(maxWidth: .infinity)
 //                    .padding(.vertical, 16)
 //                    .background(

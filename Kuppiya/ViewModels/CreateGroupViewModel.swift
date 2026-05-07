@@ -14,22 +14,22 @@ import Combine
 class CreateGroupViewModel: ObservableObject {
 
     // MARK: - Form fields
-    @Published var groupName: String        = ""
-    @Published var major: String            = ""
-    @Published var subject: String          = ""
-    @Published var university: String       = ""
-    @Published var description: String      = ""
-    @Published var isPublic: Bool           = true
+    @Published var groupName: String = ""
+    @Published var major: String = ""
+    @Published var subject: String = ""
+    @Published var university: String = ""
+    @Published var description: String = ""
+    @Published var isPublic: Bool = true
     @Published var selectedMembers: [AppUser] = []
 
     // MARK: - State
-    @Published var isLoading: Bool          = false
-    @Published var showError: Bool          = false
+    @Published var isLoading: Bool = false
+    @Published var showError: Bool = false
     @Published var errorMessage: String?
     @Published var createdGroup: StudyGroup?
-    @Published var showAddMembers: Bool     = false
-    @Published var inviteLink: String       = ""
-    @Published var showShareSheet: Bool     = false
+    @Published var showAddMembers: Bool = false
+    @Published var inviteLink: String = ""
+    @Published var showShareSheet: Bool = false
 
     private let service = FirestoreService.shared
 

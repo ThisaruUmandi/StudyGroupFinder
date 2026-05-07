@@ -10,11 +10,11 @@ import Combine
 
 @MainActor
 class StudyProgressViewModel: ObservableObject {
-    @Published var stat:          GroupStat?
-    @Published var isLoading      = false
-    @Published var showError      = false
-    @Published var errorMessage   = ""
-    @Published var showGoalSheet  = false
+    @Published var stat: GroupStat?
+    @Published var isLoading = false
+    @Published var showError = false
+    @Published var errorMessage = ""
+    @Published var showGoalSheet = false
 
     private let service = StudyProgressService.shared
 
@@ -26,7 +26,7 @@ class StudyProgressViewModel: ObservableObject {
             stat = try await service.fetchGroupStat(uid: uid, groupId: groupId)
         } catch {
             errorMessage = error.localizedDescription
-            showError    = true
+            showError = true
         }
     }
 
@@ -38,7 +38,7 @@ class StudyProgressViewModel: ObservableObject {
             stat?.weeklyGoalHours = hours
         } catch {
             errorMessage = error.localizedDescription
-            showError    = true
+            showError = true
         }
     }
 }

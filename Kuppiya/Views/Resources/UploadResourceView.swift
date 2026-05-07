@@ -62,7 +62,7 @@ struct UploadResourceView: View {
             .padding(.horizontal, 20)
             .padding(.top, 16)
         }
-        .background(Color.white.ignoresSafeArea())
+        .background(Color(.systemBackground).ignoresSafeArea())
         .navigationBarHidden(true)
         .fileImporter(
             isPresented: $vm.showFilePicker,
@@ -165,7 +165,7 @@ struct UploadResourceView: View {
                 .autocapitalization(.none)
         }
         .padding(14)
-        .background(Color.white)
+        .background(Color(.systemBackground))
         .cornerRadius(14)
         .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 3)
     }
@@ -182,9 +182,13 @@ struct UploadResourceView: View {
                 .font(.system(size: 14))
         }
         .padding(14)
-        .background(Color.white)
+        .background(Color(.systemBackground))
         .cornerRadius(14)
         .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 3)
+        .overlay {
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.gray.opacity(0.4), lineWidth: 0.5)
+        }
     }
 
     private var addButton: some View {
@@ -200,7 +204,7 @@ struct UploadResourceView: View {
                         Text("Add Resource")
                             .font(.system(size: 16, weight: .semibold))
                     }
-                    .foregroundColor(.white)
+                    .foregroundColor(Color(uiColor:.systemBackground))
                 }
             }
             .frame(maxWidth: .infinity)

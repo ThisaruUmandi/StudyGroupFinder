@@ -17,10 +17,10 @@ class HomeViewModel: ObservableObject {
     @Published var upcomingSession: StudySession?
     @Published var allUpcomingSessions: [StudySession] = []
     @Published var joinRequests: [JoinRequest] = []
-    @Published var isLoading                   = false
+    @Published var isLoading = false
     @Published var errorMessage: String?
-    @Published var showError                   = false
-    @Published var searchText                  = ""
+    @Published var showError = false
+    @Published var searchText = ""
 
     private let firestoreService = FirestoreService.shared
 
@@ -33,7 +33,7 @@ class HomeViewModel: ObservableObject {
 
             // fetch all sessions across groups
             let allSessions = try await firestoreService.fetchAllUpcomingSessions()
-            let now         = Date()
+            let now = Date()
 
             // ongoing — started within last 2 hours
             ongoingSession = allSessions.first {
@@ -59,7 +59,7 @@ class HomeViewModel: ObservableObject {
             print("Requests: \(joinRequests.count)")
         } catch {
             errorMessage = error.localizedDescription
-            showError    = true
+            showError = true
         }
         
         isLoading = false
@@ -71,7 +71,7 @@ class HomeViewModel: ObservableObject {
             joinRequests.removeAll { $0.id == request.id }
         } catch {
             errorMessage = error.localizedDescription
-            showError    = true
+            showError = true
         }
     }
 
@@ -81,7 +81,7 @@ class HomeViewModel: ObservableObject {
             joinRequests.removeAll { $0.id == request.id }
         } catch {
             errorMessage = error.localizedDescription
-            showError    = true
+            showError = true
         }
     }
 }

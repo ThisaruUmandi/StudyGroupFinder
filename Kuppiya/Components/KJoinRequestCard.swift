@@ -25,7 +25,7 @@ struct KJoinRequestCard: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(request.senderName)
                     .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(.black)
+                    .foregroundColor(.primary)
                 Text("Requested to join \(request.groupName)")
                     .font(.system(size: 12))
                     .foregroundColor(.gray)
@@ -38,7 +38,7 @@ struct KJoinRequestCard: View {
             Button(action: onReject) {
                 ZStack {
                     Circle()
-                        .fill(Color(hex: "#FBEAF0"))
+                        .fill(Color(hex: "#D4537E").opacity(0.15))
                         .frame(width: 34, height: 34)
                     Image(systemName: "xmark")
                         .font(.system(size: 11, weight: .bold))
@@ -50,7 +50,7 @@ struct KJoinRequestCard: View {
             Button(action: onApprove) {
                 ZStack {
                     Circle()
-                        .fill(Color(hex: "#E1F5EE"))
+                        .fill(Color(hex: "#1D9E75").opacity(0.15))
                         .frame(width: 34, height: 34)
                     Image(systemName: "checkmark")
                         .font(.system(size: 11, weight: .bold))
@@ -59,10 +59,9 @@ struct KJoinRequestCard: View {
             }
         }
         .padding(14)
-        .background(Color.white)
+        .background(Color(.systemBackground))
         .cornerRadius(16)
         .shadow(color: .black.opacity(0.04),
                 radius: 6, x: 0, y: 2)
     }
 }
-

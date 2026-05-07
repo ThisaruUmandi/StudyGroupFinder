@@ -80,7 +80,7 @@ struct ChatView: View {
 
                 // Reaction picker overlay
                 if showReactionPicker, let msg = reactingTo {
-                    Color.black.opacity(0.001)
+                    Color.primary.opacity(0.001)
                         .ignoresSafeArea()
                         .onTapGesture {
                             showReactionPicker = false
@@ -137,7 +137,7 @@ struct ChatView: View {
                     .frame(width: 36, height: 36)
                     .background(Color(UIColor.systemBackground))
                     .clipShape(Circle())
-                    .shadow(color: .black.opacity(0.06), radius: 4, x: 0, y: 2)
+                    .shadow(color: .primary.opacity(0.06), radius: 4, x: 0, y: 2)
             }
 
             KGroupAvatar(
@@ -160,7 +160,7 @@ struct ChatView: View {
         .padding(.horizontal, 20)
         .padding(.vertical, 12)
         .background(Color(UIColor.systemBackground))
-        .shadow(color: .black.opacity(0.04), radius: 4, x: 0, y: 2)
+        .shadow(color: .primary.opacity(0.04), radius: 4, x: 0, y: 2)
     }
 
     // MARK: - Input Bar
@@ -211,7 +211,7 @@ struct ChatView: View {
                 } label: {
                     Image(systemName: "arrow.up")
                         .font(.system(size: 15, weight: .bold))
-                        .foregroundColor(.white)
+                        .foregroundColor(Color(uiColor: .systemBackground))
                         .frame(width: 36, height: 36)
                         .background(
                             vm.inputText.trimmingCharacters(

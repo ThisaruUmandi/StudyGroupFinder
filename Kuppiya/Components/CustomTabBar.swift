@@ -36,7 +36,7 @@ struct CustomTabBar: View {
                         }
                     }
                     .padding(.vertical, 8)
-                    .foregroundStyle(activeTab == tab ? activeForeground : .black)
+                    .foregroundStyle(activeTab == tab ? activeForeground : .primary)
                     .padding(.leading, 20)
                     .padding(.trailing, 15)
                     .background {
@@ -51,10 +51,12 @@ struct CustomTabBar: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.top, 10)
-        .background(Color.white)
+        .background(Color(.systemGroupedBackground))
     }
 }
 
 #Preview {
     TabBarView()
+        .environmentObject(AuthViewModel())
+        .environmentObject(TabBarViewModel())
 }

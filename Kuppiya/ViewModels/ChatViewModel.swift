@@ -12,28 +12,28 @@ import Combine
 
 @MainActor
 class ChatViewModel: ObservableObject {
-    @Published var messages:        [Message]  = []
-    @Published var inputText:       String     = ""
-    @Published var replyingTo:      Message?   = nil
-    @Published var showReactions:   Message?   = nil
-    @Published var isLoading:       Bool       = true
-    @Published var showError:       Bool       = false
-    @Published var errorMessage:    String     = ""
+    @Published var messages: [Message]  = []
+    @Published var inputText: String     = ""
+    @Published var replyingTo: Message?   = nil
+    @Published var showReactions: Message?   = nil
+    @Published var isLoading: Bool = true
+    @Published var showError: Bool = false
+    @Published var errorMessage: String = ""
 
-    private let service   = ChatService.shared
+    private let service = ChatService.shared
     private var listener: ListenerRegistration?
     var currentUid: String { Auth.auth().currentUser?.uid ?? "" }
 
     // MARK: - Grouped messages for date separators
     struct DayGroup: Identifiable {
-        var id:       String     // date label
-        var label:    String
+        var id: String // date label
+        var label: String
         var messages: [Message]
     }
 
     var groupedMessages: [DayGroup] {
         var groups: [String: [Message]] = [:]
-        var order:  [String]            = []
+        var order: [String] = []
 
         for msg in messages {
             let label = msg.dateSeparatorLabel
@@ -70,9 +70,9 @@ class ChatViewModel: ObservableObject {
 
         let reply = replyingTo.map {
             ReplyInfo(
-                messageId:  $0.messageId,
+                messageId: $0.messageId,
                 senderName: $0.senderName,
-                text:       $0.text
+                text: $0.text
             )
         }
 
@@ -82,12 +82,12 @@ class ChatViewModel: ObservableObject {
         do {
             try await service.send(
                 groupId: groupId,
-                text:    text,
+                text: text,
                 replyTo: reply
             )
         } catch {
             errorMessage = error.localizedDescription
-            showError    = true
+            showError = true
         }
     }
 
@@ -96,14 +96,14 @@ class ChatViewModel: ObservableObject {
         guard let msgId = message.id else { return }
         do {
             try await service.toggleReaction(
-                groupId:   groupId,
+                groupId: groupId,
                 messageId: msgId,
-                emoji:     emoji,
-                uid:       currentUid
+                emoji: emoji,
+                uid: currentUid
             )
         } catch {
             errorMessage = error.localizedDescription
-            showError    = true
+            showError = true
         }
         showReactions = nil
     }
@@ -115,7 +115,7 @@ class ChatViewModel: ObservableObject {
             try await service.delete(groupId: groupId, messageId: msgId)
         } catch {
             errorMessage = error.localizedDescription
-            showError    = true
+            showError = true
         }
     }
 

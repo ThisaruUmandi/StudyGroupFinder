@@ -10,7 +10,7 @@ struct GroupsView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color.white.ignoresSafeArea()
+                Color(.systemBackground).ignoresSafeArea()
 
                 VStack(spacing: 0) {
 
@@ -19,7 +19,7 @@ struct GroupsView: View {
                         HStack {
                             Text("My Groups")
                                 .font(.system(size: 22, weight: .bold))
-                                .foregroundColor(.black)
+                                .foregroundColor(.primary)
                             Spacer()
                             // Create Group button
                             Button {
@@ -46,7 +46,7 @@ struct GroupsView: View {
                             .padding(.bottom, 16)
                             .padding(.top, 8)
                     }
-                    .background(Color.white)
+                    .background(Color(.systemBackground))
 
                     // MARK: Groups List
                     if viewModel.isLoading {

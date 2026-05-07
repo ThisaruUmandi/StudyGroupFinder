@@ -13,7 +13,7 @@ struct QuestionDetailView: View {
     @StateObject private var vm = QuestionDetailViewModel()
 
     let question: Question
-    let group:    StudyGroup
+    let group: StudyGroup
 
     @FocusState private var isInputFocused: Bool
 
@@ -76,7 +76,7 @@ struct QuestionDetailView: View {
                     .frame(width: 36, height: 36)
                     .background(Color(UIColor.systemBackground))
                     .clipShape(Circle())
-                    .shadow(color: .black.opacity(0.06), radius: 4, x: 0, y: 2)
+                    .shadow(color: .primary.opacity(0.06), radius: 4, x: 0, y: 2)
             }
             Spacer()
             Text("Q&A")
@@ -138,9 +138,13 @@ struct QuestionDetailView: View {
             }
             .padding(16)
         }
-        .background(Color.white)
+        .background(Color(.systemBackground))
         .cornerRadius(14)
-        .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 3)
+        .shadow(color: .primary.opacity(0.05), radius: 8, x: 0, y: 3)
+        .overlay {
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.gray.opacity(0.4), lineWidth: 0.5)
+        }
     }
 
     private var answersSection: some View {
@@ -273,7 +277,7 @@ struct QuestionDetailView: View {
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
         }
-        .background(Color.white)
+        .background(Color(.systemBackground))
         .cornerRadius(14)
         .overlay(
             RoundedRectangle(cornerRadius: 14)
@@ -284,7 +288,7 @@ struct QuestionDetailView: View {
                     lineWidth: isBest ? 1.5 : 1
                 )
         )
-        .shadow(color: .black.opacity(0.04), radius: 6, x: 0, y: 2)
+        .shadow(color: .primary.opacity(0.04), radius: 6, x: 0, y: 2)
     }
 
     private var answerInput: some View {
@@ -327,7 +331,7 @@ struct QuestionDetailView: View {
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
-            .background(Color.white)
+            .background(Color(.systemBackground))
         }
     }
 

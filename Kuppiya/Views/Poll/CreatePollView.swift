@@ -93,7 +93,7 @@ struct CreatePollView: View {
                                 .font(.system(size: 16, weight: .bold))
                         }
                     }
-                    .foregroundColor(.white)
+                    .foregroundColor(Color(uiColor: .systemBackground))
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 16)
                     .background(vm.isValid ? Color(hex: "#0300BF") : Color(.systemGray4))
@@ -105,9 +105,9 @@ struct CreatePollView: View {
                 .padding(.bottom, 40)
             }
         }
-        .background(Color.white.ignoresSafeArea())
+        .background(Color(.systemBackground).ignoresSafeArea())
         .safeAreaInset(edge: .top) {
-            navBar.background(Color.white)
+            navBar.background(Color(.systemBackground))
         }
         .navigationBarHidden(true)
         .onAppear    { tabManager.isTabBarHidden = true  }
@@ -199,7 +199,7 @@ struct CreatePollView: View {
             }
         }
         .padding(16)
-        .background(Color.white)
+        .background(Color(.systemBackground))
         .cornerRadius(14)
         .overlay(
             RoundedRectangle(cornerRadius: 14)
@@ -238,7 +238,7 @@ struct CreatePollView: View {
                 }
             }
         }
-        .background(Color.white)
+        .background(Color(.systemBackground))
         .cornerRadius(14)
         .overlay(
             RoundedRectangle(cornerRadius: 14)
@@ -307,30 +307,30 @@ struct CreatePollView: View {
     private var settingsCard: some View {
         VStack(spacing: 0) {
             settingRow(
-                icon:     "checkmark.square",
-                color:    Color(hex: "#6B3FD4"),
-                title:    "Allow Multiple Options",
+                icon: "checkmark.square",
+                color: Color(hex: "#6B3FD4"),
+                title: "Allow Multiple Options",
                 subtitle: "Users can select more than one answer",
-                value:    $vm.allowMultiple
+                value: $vm.allowMultiple
             )
             Divider().padding(.leading, 56)
             settingRow(
-                icon:     "eye.slash",
-                color:    Color(hex: "#0300BF"),
-                title:    "Anonymous Voting",
+                icon: "eye.slash",
+                color: Color(hex: "#0300BF"),
+                title: "Anonymous Voting",
                 subtitle: "Votes will not be disclosed to others",
-                value:    $vm.isAnonymous
+                value: $vm.isAnonymous
             )
             Divider().padding(.leading, 56)
             settingRow(
-                icon:     "clock",
-                color:    Color(hex: "#BA7517"),
-                title:    "Set Expiration Date",
+                icon: "clock",
+                color: Color(hex: "#BA7517"),
+                title: "Set Expiration Date",
                 subtitle: "Poll will close automatically",
-                value:    $vm.hasExpiry
+                value: $vm.hasExpiry
             )
         }
-        .background(Color.white)
+        .background(Color(.systemBackground))
         .cornerRadius(14)
         .overlay(
             RoundedRectangle(cornerRadius: 14)
@@ -379,7 +379,7 @@ struct CreatePollView: View {
         )
         .datePickerStyle(.compact)
         .padding(16)
-        .background(Color.white)
+        .background(Color(.systemBackground))
         .cornerRadius(14)
         .overlay(
             RoundedRectangle(cornerRadius: 14)

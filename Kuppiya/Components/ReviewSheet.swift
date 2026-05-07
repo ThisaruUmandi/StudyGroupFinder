@@ -10,9 +10,9 @@ import SwiftUI
 struct ReviewSheet: View {
     @Binding var rating: Int
     @Binding var reviewText: String
-    var title: String         = "How is Your Group ?"
-    var subtitle: String      = "Please take a moment to rate and review\nyour experience in this group."
-    var placeholder: String   = "Type a review"
+    var title: String = "How is Your Group ?"
+    var subtitle: String = "Please take a moment to rate and review\nyour experience in this group."
+    var placeholder: String = "Type a review"
     let onSubmit: () -> Void
 
     var body: some View {

@@ -76,7 +76,7 @@ struct SettingsFormField: View {
             isMultiline: true
         )
     }
-    .background(Color.white)
+    .background(Color(UIColor.systemBackground))
     .cornerRadius(14)
     .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 3)
     .padding()

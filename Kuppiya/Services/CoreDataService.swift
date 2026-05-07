@@ -52,28 +52,28 @@ class CoreDataService {
         dResourceId.attributeType = .stringAttributeType
         dResourceId.isOptional = true
 
-        let dTitle                = NSAttributeDescription()
-        dTitle.name               = "title"
-        dTitle.attributeType      = .stringAttributeType
-        dTitle.isOptional         = true
+        let dTitle = NSAttributeDescription()
+        dTitle.name = "title"
+        dTitle.attributeType = .stringAttributeType
+        dTitle.isOptional = true
 
-        let dFilename             = NSAttributeDescription()
-        dFilename.name            = "filename"
-        dFilename.attributeType   = .stringAttributeType
-        dFilename.isOptional      = true
+        let dFilename = NSAttributeDescription()
+        dFilename.name = "filename"
+        dFilename.attributeType = .stringAttributeType
+        dFilename.isOptional = true
 
-        let dFilePath             = NSAttributeDescription()
-        dFilePath.name            = "filePath"
-        dFilePath.attributeType   = .stringAttributeType
-        dFilePath.isOptional      = true
+        let dFilePath = NSAttributeDescription()
+        dFilePath.name = "filePath"
+        dFilePath.attributeType = .stringAttributeType
+        dFilePath.isOptional = true
 
-        let dFileSize             = NSAttributeDescription()
-        dFileSize.name            = "fileSize"
-        dFileSize.attributeType   = .integer64AttributeType
-        dFileSize.isOptional      = true
+        let dFileSize = NSAttributeDescription()
+        dFileSize.name = "fileSize"
+        dFileSize.attributeType = .integer64AttributeType
+        dFileSize.isOptional = true
 
-        let dDownloadedAt         = NSAttributeDescription()
-        dDownloadedAt.name        = "downloadedAt"
+        let dDownloadedAt = NSAttributeDescription()
+        dDownloadedAt.name = "downloadedAt"
         dDownloadedAt.attributeType = .dateAttributeType
         dDownloadedAt.isOptional  = true
 
@@ -103,10 +103,10 @@ class CoreDataService {
             existing.setValue(Date(),      forKey: "generatedAt")
         } else {
             let obj = NSEntityDescription.insertNewObject(forEntityName: "CDSummary", into: context)
-            obj.setValue(resourceId,  forKey: "resourceId")
-            obj.setValue(title,       forKey: "title")
+            obj.setValue(resourceId, forKey: "resourceId")
+            obj.setValue(title, forKey: "title")
             obj.setValue(summaryText, forKey: "summaryText")
-            obj.setValue(Date(),      forKey: "generatedAt")
+            obj.setValue(Date(), forKey: "generatedAt")
         }
         save()
         print("Summary saved: \(title)")
@@ -116,8 +116,8 @@ class CoreDataService {
         let request = NSFetchRequest<NSManagedObject>(entityName: "CDSummary")
         request.sortDescriptors = [NSSortDescriptor(key: "generatedAt", ascending: false)]
         return ((try? context.fetch(request)) ?? []).map {(
-            resourceId:  $0.value(forKey: "resourceId")  as? String ?? "",
-            title:       $0.value(forKey: "title")       as? String ?? "",
+            resourceId: $0.value(forKey: "resourceId") as? String ?? "",
+            title: $0.value(forKey: "title") as? String ?? "",
             summaryText: $0.value(forKey: "summaryText") as? String ?? "",
             generatedAt: $0.value(forKey: "generatedAt") as? Date   ?? Date()
         )}
@@ -137,15 +137,15 @@ class CoreDataService {
         request.predicate = NSPredicate(format: "resourceId == %@", resourceId)
         if let existing = (try? context.fetch(request))?.first {
             existing.setValue(filePath, forKey: "filePath")
-            existing.setValue(Date(),   forKey: "downloadedAt")
+            existing.setValue(Date(), forKey: "downloadedAt")
         } else {
             let obj = NSEntityDescription.insertNewObject(forEntityName: "CDDownload", into: context)
             obj.setValue(resourceId, forKey: "resourceId")
-            obj.setValue(title,      forKey: "title")
-            obj.setValue(filename,   forKey: "filename")
-            obj.setValue(filePath,   forKey: "filePath")
-            obj.setValue(fileSize,   forKey: "fileSize")
-            obj.setValue(Date(),     forKey: "downloadedAt")
+            obj.setValue(title, forKey: "title")
+            obj.setValue(filename, forKey: "filename")
+            obj.setValue(filePath, forKey: "filePath")
+            obj.setValue(fileSize, forKey: "fileSize")
+            obj.setValue(Date(), forKey: "downloadedAt")
         }
         save()
         print("Download saved: \(filename)")
@@ -155,11 +155,11 @@ class CoreDataService {
         let request = NSFetchRequest<NSManagedObject>(entityName: "CDDownload")
         request.sortDescriptors = [NSSortDescriptor(key: "downloadedAt", ascending: false)]
         return ((try? context.fetch(request)) ?? []).map {(
-            resourceId:   $0.value(forKey: "resourceId")   as? String ?? "",
-            title:        $0.value(forKey: "title")        as? String ?? "",
-            filename:     $0.value(forKey: "filename")     as? String ?? "",
-            filePath:     $0.value(forKey: "filePath")     as? String ?? "",
-            fileSize:     $0.value(forKey: "fileSize")     as? Int64  ?? 0,
+            resourceId: $0.value(forKey: "resourceId") as? String ?? "",
+            title: $0.value(forKey: "title") as? String ?? "",
+            filename: $0.value(forKey: "filename") as? String ?? "",
+            filePath: $0.value(forKey: "filePath") as? String ?? "",
+            fileSize: $0.value(forKey: "fileSize") as? Int64  ?? 0,
             downloadedAt: $0.value(forKey: "downloadedAt") as? Date   ?? Date()
         )}
     }

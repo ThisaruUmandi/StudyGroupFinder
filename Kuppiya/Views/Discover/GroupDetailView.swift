@@ -41,7 +41,7 @@ struct GroupDetailView: View {
 
             buttonArea
         }
-        .background(Color.white.ignoresSafeArea())
+        .background(Color(.systemGroupedBackground))
         .navigationBarHidden(true)
         .navigationDestination(isPresented: $vm.navigateToDashboard) {
             GroupDashboardView(group: group).environmentObject(authVM)
@@ -105,7 +105,7 @@ struct GroupDetailView: View {
             )
         }
         .padding(16)
-        .background(Color.white)
+        .background(Color(.systemGroupedBackground))
         .cornerRadius(16)
         .shadow(color: .black.opacity(0.06), radius: 12, x: 0, y: 3)
     }
@@ -173,7 +173,7 @@ struct GroupDetailView: View {
                         .frame(width: 28, height: 28)
                     Text("+\(extra)")
                         .font(.system(size: 9, weight: .bold))
-                        .foregroundColor(.white)
+                        .foregroundColor(Color(.systemGroupedBackground))
                 }
                 .offset(x: CGFloat(shown) * 18)
             }
@@ -249,7 +249,7 @@ struct GroupDetailView: View {
             }
             .padding(.horizontal, 20)
             .padding(.vertical, 16)
-            .background(Color.white)
+            .background(Color(.systemGroupedBackground))
             .padding(.bottom, 100)
         }
     }

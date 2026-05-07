@@ -13,18 +13,18 @@ import Combine
 
 @MainActor
 class ResourceDetailViewModel: ObservableObject {
-    @Published var isLiked       = false
-    @Published var isSaved       = false
+    @Published var isLiked = false
+    @Published var isSaved = false
     @Published var isDownloading = false
     @Published var isDownloaded  = false
     @Published var localURL: URL?
-    @Published var summary       = ""
+    @Published var summary = ""
     @Published var isSummarizing = false
-    @Published var showError     = false
-    @Published var errorMessage  = ""
+    @Published var showError = false
+    @Published var errorMessage = ""
 
     private let firestoreService = FirestoreService.shared
-    private let storageService   = ResourceStorageService.shared
+    private let storageService = ResourceStorageService.shared
 
     var currentUid: String { Auth.auth().currentUser?.uid ?? "" }
 
@@ -55,14 +55,14 @@ class ResourceDetailViewModel: ObservableObject {
         do {
             try await firestoreService.toggleLike(
                 resourceId: resource.resourceId,
-                groupId:    resource.groupId,
-                uid:        currentUid,
-                isLiked:    isLiked
+                groupId: resource.groupId,
+                uid: currentUid,
+                isLiked: isLiked
             )
             isLiked.toggle()
         } catch {
             errorMessage = error.localizedDescription
-            showError    = true
+            showError = true
         }
     }
 
@@ -70,14 +70,14 @@ class ResourceDetailViewModel: ObservableObject {
         do {
             try await firestoreService.toggleSave(
                 resourceId: resource.resourceId,
-                groupId:    resource.groupId,
-                uid:        currentUid,
-                isSaved:    isSaved
+                groupId: resource.groupId,
+                uid: currentUid,
+                isSaved: isSaved
             )
             isSaved.toggle()
         } catch {
             errorMessage = error.localizedDescription
-            showError    = true
+            showError = true
         }
     }
 
@@ -97,15 +97,15 @@ class ResourceDetailViewModel: ObservableObject {
         isDownloading = true
         defer { isDownloading = false }
         do {
-            let url  = try await storageService.downloadForPreview(
-                from:     resource.url,
+            let url = try await storageService.downloadForPreview(
+                from: resource.url,
                 filename: "\(resource.title).\(resource.fileExtension)"
             )
             localURL = url
             print("Preview loaded from temp: \(resource.title)")
         } catch {
             errorMessage = error.localizedDescription
-            showError    = true
+            showError = true
         }
     }
 
@@ -119,17 +119,17 @@ class ResourceDetailViewModel: ObservableObject {
         defer { isDownloading = false }
         do {
             let url = try await storageService.downloadFile(
-                from:       resource.url,
-                filename:   "\(resource.title).\(resource.fileExtension)",
+                from: resource.url,
+                filename: "\(resource.title).\(resource.fileExtension)",
                 resourceId: resource.resourceId,
-                title:      resource.title
+                title: resource.title
             )
-            localURL     = url
+            localURL = url
             isDownloaded = true
             print("Permanently downloaded: \(resource.title)")
         } catch {
             errorMessage = error.localizedDescription
-            showError    = true
+            showError = true
         }
     }
 
@@ -144,7 +144,7 @@ class ResourceDetailViewModel: ObservableObject {
         guard resource.isPDF, let url = localURL,
               FileManager.default.fileExists(atPath: url.path) else {
             errorMessage = "Please download the file first to summarize."
-            showError    = true
+            showError = true
             return
         }
 
@@ -159,7 +159,7 @@ class ResourceDetailViewModel: ObservableObject {
 
         guard !fullText.isEmpty else {
             errorMessage = "Could not extract text from this PDF."
-            showError    = true
+            showError = true
             return
         }
 
@@ -168,8 +168,8 @@ class ResourceDetailViewModel: ObservableObject {
 
         // Save to Core Data — persists offline
         CoreDataService.shared.saveSummary(
-            resourceId:  resource.resourceId,
-            title:       resource.title,
+            resourceId: resource.resourceId,
+            title: resource.title,
             summaryText: summarized
         )
         print("Summary saved to Core Data: \(resource.title)")
@@ -212,19 +212,19 @@ class ResourceDetailViewModel: ObservableObject {
         do {
             try await firestoreService.deleteResource(
                 resourceId: resource.resourceId,
-                groupId:    resource.groupId
+                groupId: resource.groupId
             )
             if !resource.isLink {
                 try? await storageService.deleteFile(
-                    groupId:       resource.groupId,
-                    resourceId:    resource.resourceId,
+                    groupId: resource.groupId,
+                    resourceId: resource.resourceId,
                     fileExtension: resource.fileExtension
                 )
             }
             completion()
         } catch {
             errorMessage = error.localizedDescription
-            showError    = true
+            showError = true
         }
     }
 }

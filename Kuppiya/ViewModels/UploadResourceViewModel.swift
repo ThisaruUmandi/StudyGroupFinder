@@ -13,16 +13,16 @@ import Combine
 
 @MainActor
 class UploadResourceViewModel: ObservableObject {
-    @Published var title        = ""
-    @Published var linkURL      = ""
+    @Published var title = ""
+    @Published var linkURL = ""
     @Published var selectedType = 0  // 0=Document, 1=Media, 2=Link
     @Published var selectedFile: Data?
     @Published var selectedFileName = ""
     @Published var selectedFileExt  = ""
-    @Published var isUploading  = false
-    @Published var showError    = false
+    @Published var isUploading = false
+    @Published var showError = false
     @Published var errorMessage = ""
-    @Published var didUpload    = false
+    @Published var didUpload = false
     @Published var showFilePicker = false
     @Published var showImagePicker = false
 
@@ -41,8 +41,8 @@ class UploadResourceViewModel: ObservableObject {
         if title.trimmingCharacters(in: .whitespaces).isEmpty { return false }
         switch selectedType {
         case 0, 1: return selectedFile != nil
-        case 2:    return !linkURL.trimmingCharacters(in: .whitespaces).isEmpty
-        default:   return false
+        case 2: return !linkURL.trimmingCharacters(in: .whitespaces).isEmpty
+        default: return false
         }
     }
 
@@ -51,9 +51,9 @@ class UploadResourceViewModel: ObservableObject {
         isUploading = true
         defer { isUploading = false }
 
-        let uid          = Auth.auth().currentUser?.uid ?? ""
-        let resourceId   = UUID().uuidString
-        var downloadURL  = ""
+        let uid = Auth.auth().currentUser?.uid ?? ""
+        let resourceId  = UUID().uuidString
+        var downloadURL = ""
 
         do {
             // Upload file to Storage if not a link
@@ -72,17 +72,17 @@ class UploadResourceViewModel: ObservableObject {
             let user = try? await firestoreService.fetchUser(uid: uid)
 
             let resource = Resource(
-                resourceId:   resourceId,
-                groupId:      group.groupId,
-                title:        title,
-                type:         typeString,
-                url:          downloadURL,
+                resourceId: resourceId,
+                groupId: group.groupId,
+                title: title,
+                type: typeString,
+                url: downloadURL,
                 fileExtension: selectedFileExt,
-                uploadedBy:   uid,
+                uploadedBy: uid,
                 uploaderName: user?.username ?? "Unknown",
-                createdAt:    Date(),
-                likedBy:      [],
-                savedBy:      []
+                createdAt: Date(),
+                likedBy: [],
+                savedBy: []
             )
 
             try await firestoreService.createResource(resource, in: group.groupId)
@@ -99,7 +99,7 @@ class UploadResourceViewModel: ObservableObject {
             didUpload = true
         } catch {
             errorMessage = error.localizedDescription
-            showError    = true
+            showError = true
         }
     }
 }

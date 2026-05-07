@@ -122,8 +122,8 @@ struct TrendingGroupCard: View {
                         .padding(.vertical, 5)
                         .background(
                             group.privacy == "public"
-                            ? Color(hex: "#EDE7FF")
-                            : Color(hex: "#FFE8EC")
+                            ? Color(hex: "#6B3FD4").opacity(0.12)
+                            : Color(hex: "#E8143C").opacity(0.12)
                         )
                         .cornerRadius(20)
                 }
@@ -134,6 +134,10 @@ struct TrendingGroupCard: View {
             .cornerRadius(18)
             .shadow(color: .black.opacity(0.06),
                     radius: 8, x: 0, y: 3)
+            .overlay {
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(Color.gray.opacity(0.4), lineWidth: 1)
+            }
         }
         .buttonStyle(.plain)
     }

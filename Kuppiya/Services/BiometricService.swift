@@ -12,7 +12,7 @@ import Security
 class BiometricService {
     static let shared = BiometricService()
 
-    private let emailKey    = "kuppiya_email"
+    private let emailKey = "kuppiya_email"
     private let passwordKey = "kuppiya_password"
 
     // MARK: - Check availability

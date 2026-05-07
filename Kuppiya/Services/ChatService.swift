@@ -12,7 +12,7 @@ import Combine
 
 class ChatService {
     static let shared = ChatService()
-    private let db    = Firestore.firestore()
+    private let db = Firestore.firestore()
 
     private func ref(groupId: String) -> CollectionReference {
         db.collection("studyGroups")

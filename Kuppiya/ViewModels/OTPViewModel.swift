@@ -15,11 +15,11 @@ class OTPViewModel: ObservableObject {
     @Published var otpDigits: [String] = Array(
         repeating: "", count: 6
     )
-    @Published var isLoading: Bool   = false
-    @Published var isVerified: Bool  = false
+    @Published var isLoading: Bool = false
+    @Published var isVerified: Bool = false
     @Published var errorMessage: String?
-    @Published var showError: Bool   = false
-    @Published var resendTimer: Int  = 30
+    @Published var showError: Bool = false
+    @Published var resendTimer: Int = 30
 
     private var timerTask: Task<Void, Never>?
 
@@ -37,11 +37,11 @@ class OTPViewModel: ObservableObject {
                 isVerified = true
             } else {
                 errorMessage = "Email not verified yet.\nPlease check your inbox and spam folder."
-                showError    = true
+                showError = true
             }
         } catch {
             errorMessage = error.localizedDescription
-            showError    = true
+            showError = true
         }
         isLoading = false
     }
@@ -54,7 +54,7 @@ class OTPViewModel: ObservableObject {
             startTimer()
         } catch {
             errorMessage = error.localizedDescription
-            showError    = true
+            showError = true
         }
     }
 

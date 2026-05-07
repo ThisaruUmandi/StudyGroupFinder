@@ -54,7 +54,7 @@ struct KResourceCard: View {
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
-            .background(Color.white)
+            .background(Color(.systemBackground))
             .cornerRadius(14)
             .shadow(color: .black.opacity(0.04), radius: 6, x: 0, y: 2)
         }

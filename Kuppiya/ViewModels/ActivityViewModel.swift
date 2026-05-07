@@ -215,8 +215,8 @@ class ActivityViewModel: ObservableObject {
         switch url.pathExtension.lowercased() {
         case "pdf": return "#E84040"
         case "png", "jpg", "jpeg": return "#1D9E75"
-        case "mp4", "mov":         return "#6B3FD4"
-        default:                   return "#BA7517"
+        case "mp4", "mov":  return "#6B3FD4"
+        default: return "#BA7517"
         }
     }
 }

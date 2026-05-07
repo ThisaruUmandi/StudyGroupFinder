@@ -18,21 +18,21 @@ struct Poll: Identifiable, Codable, Hashable {
     @DocumentID var id: String?
     var pollId: String
     var groupId: String
-    var authorId:     String
-    var authorName:   String
-    var question:     String
-    var options:      [PollOption]
+    var authorId: String
+    var authorName: String
+    var question: String
+    var options: [PollOption]
     var correctIndex: Int
-    var duration:     Int
+    var duration: Int
     var allowMultiple: Bool = false
-    var isAnonymous:   Bool = false
-    var endsAt:       Date
-    var status:       String
-    var createdAt:    Date
-    var totalVotes:   Int
+    var isAnonymous: Bool = false
+    var endsAt: Date
+    var status: String
+    var createdAt: Date
+    var totalVotes: Int
 
-    var isActive: Bool  { status == "active" && Date() < endsAt }
-    var isClosed: Bool  { status == "closed" || Date() >= endsAt }
+    var isActive: Bool { status == "active" && Date() < endsAt }
+    var isClosed: Bool { status == "closed" || Date() >= endsAt }
 
     var timeLeft: String {
         let diff = endsAt.timeIntervalSince(Date())
@@ -50,8 +50,8 @@ struct Poll: Identifiable, Codable, Hashable {
 
     var timeAgo: String {
         let diff = Date().timeIntervalSince(createdAt)
-        if diff < 60    { return "Just now" }
-        if diff < 3600  { return "\(Int(diff/60))m ago" }
+        if diff < 60 { return "Just now" }
+        if diff < 3600 { return "\(Int(diff/60))m ago" }
         if diff < 86400 { return "\(Int(diff/3600))h ago" }
         return "\(Int(diff/86400))d ago"
     }

@@ -41,7 +41,7 @@ struct TabBarView: View {
 
                 if !tabManager.isTabBarHidden {
                     CustomTabBar(activeTab: $tabManager.activeTab)
-                        .shadow(color: .black.opacity(0.15), radius: 10)
+                        .shadow(color: .primary.opacity(0.15), radius: 10)
                         .padding(.bottom, 8)
                 }
             }

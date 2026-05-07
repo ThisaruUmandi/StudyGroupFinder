@@ -11,15 +11,15 @@ import Combine
 
 @MainActor
 class CreatePollViewModel: ObservableObject {
-    @Published var question      = ""
-    @Published var options       = ["", ""]
-    @Published var correctIndex  = 0
+    @Published var question = ""
+    @Published var options = ["", ""]
+    @Published var correctIndex = 0
     @Published var allowMultiple = false
-    @Published var isAnonymous   = false
-    @Published var hasExpiry     = false
-    @Published var expiryDate    = Date().addingTimeInterval(86400)
-    @Published var isPosting     = false
-    @Published var showError     = false
+    @Published var isAnonymous = false
+    @Published var hasExpiry = false
+    @Published var expiryDate = Date().addingTimeInterval(86400)
+    @Published var isPosting = false
+    @Published var showError = false
     @Published var errorMessage  = ""
 
     private let service = FirestoreService.shared
@@ -46,20 +46,20 @@ class CreatePollViewModel: ObservableObject {
             let correct = allowMultiple ? -1 : correctIndex
 
             try await service.createPoll(
-                groupId:       groupId,
-                authorId:      currentUid,
-                authorName:    authorName,
-                question:      question.trimmingCharacters(in: .whitespaces),
-                options:       validOptions,
-                correctIndex:  correct,
-                duration:      duration,
+                groupId: groupId,
+                authorId: currentUid,
+                authorName: authorName,
+                question: question.trimmingCharacters(in: .whitespaces),
+                options: validOptions,
+                correctIndex: correct,
+                duration: duration,
                 allowMultiple: allowMultiple,
-                isAnonymous:   isAnonymous
+                isAnonymous: isAnonymous
             )
             completion()
         } catch {
             errorMessage = error.localizedDescription
-            showError    = true
+            showError = true
         }
     }
 }

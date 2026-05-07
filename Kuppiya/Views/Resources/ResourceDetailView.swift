@@ -77,9 +77,9 @@ struct ResourceDetailView: View {
                     .font(.system(size: 15, weight: .semibold))
                     .foregroundColor(.primary)
                     .frame(width: 36, height: 36)
-                    .background(Color.white)
+                    .background(Color(.systemBackground))
                     .clipShape(Circle())
-                    .shadow(color: .black.opacity(0.06), radius: 4, x: 0, y: 2)
+                    .shadow(color: .primary.opacity(0.06), radius: 4, x: 0, y: 2)
             }
             Spacer()
             Text("Resources")
@@ -114,9 +114,9 @@ struct ResourceDetailView: View {
             Spacer()
         }
         .padding(16)
-        .background(Color.white)
+        .background(Color(.systemBackground))
         .cornerRadius(14)
-        .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 3)
+        .shadow(color: .primary.opacity(0.05), radius: 8, x: 0, y: 3)
     }
 
     // MARK: - Action Bar
@@ -182,9 +182,9 @@ struct ResourceDetailView: View {
             }
         }
         .padding(.vertical, 4)
-        .background(Color.white)
+        .background(Color(.systemBackground))
         .cornerRadius(14)
-        .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 3)
+        .shadow(color: .primary.opacity(0.05), radius: 8, x: 0, y: 3)
     }
 
     private var divider: some View {
@@ -265,7 +265,7 @@ struct ResourceDetailView: View {
                 PDFKitView(url: url)
                     .frame(height: 520)
                     .cornerRadius(14)
-                    .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 3)
+                    .shadow(color: .primary.opacity(0.05), radius: 8, x: 0, y: 3)
             } else if resource.isMedia {
                 AsyncImage(url: url) { phase in
                     switch phase {
@@ -310,9 +310,9 @@ struct ResourceDetailView: View {
                 .lineLimit(2)
         }
         .padding(14)
-        .background(Color.white)
+        .background(Color(.systemBackground))
         .cornerRadius(14)
-        .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 3)
+        .shadow(color: .primary.opacity(0.05), radius: 8, x: 0, y: 3)
         .onTapGesture {
             if let url = URL(string: resource.url) {
                 UIApplication.shared.open(url)
@@ -329,7 +329,7 @@ struct ResourceDetailView: View {
         }
         .frame(maxWidth: .infinity)
         .frame(height: 200)
-        .background(Color.white)
+        .background(Color(.systemBackground))
         .cornerRadius(14)
     }
 
@@ -344,7 +344,7 @@ struct ResourceDetailView: View {
         }
         .frame(maxWidth: .infinity)
         .frame(height: 200)
-        .background(Color.white)
+        .background(Color(.systemBackground))
         .cornerRadius(14)
     }
 }

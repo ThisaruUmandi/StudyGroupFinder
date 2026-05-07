@@ -38,7 +38,7 @@ class ProfileViewModel: ObservableObject {
             user = try await service.fetchUser(uid: uid)
         } catch {
             errorMessage = error.localizedDescription
-            showError    = true
+            showError = true
         }
     }
 

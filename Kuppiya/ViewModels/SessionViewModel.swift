@@ -10,17 +10,17 @@ import Combine
 
 @MainActor
 class SessionViewModel: ObservableObject {
-    @Published var sessions: [StudySession]      = []
+    @Published var sessions: [StudySession] = []
     @Published var selectedFilter: SessionFilter = .all
-    @Published var showingPastSessions           = false
-    @Published var showError                     = false
+    @Published var showingPastSessions = false
+    @Published var showError = false
     @Published var errorMessage: String?
 
     private let service = FirestoreService.shared
 
     enum SessionFilter: String, CaseIterable {
-        case all      = "All"
-        case online   = "Online"
+        case all = "All"
+        case online = "Online"
         case physical = "Physical"
     }
 
@@ -56,14 +56,14 @@ class SessionViewModel: ObservableObject {
             sessions = try await service.fetchSessions(for: groupId)
         } catch {
             errorMessage = error.localizedDescription
-            showError    = true
+            showError = true
         }
     }
 
     private func applyFilter(_ list: [StudySession]) -> [StudySession] {
         switch selectedFilter {
-        case .all:      return list
-        case .online:   return list.filter { $0.isOnline }
+        case .all: return list
+        case .online: return list.filter { $0.isOnline }
         case .physical: return list.filter { $0.isPhysical }
         }
     }

@@ -11,12 +11,12 @@ import Combine
 
 @MainActor
 class GroupsViewModel: ObservableObject {
-    @Published var myGroups: [StudyGroup]        = []
+    @Published var myGroups: [StudyGroup] = []
     @Published var sessionCounts: [String: Int]  = [:]
-    @Published var isLoading: Bool               = false
-    @Published var errorMessage: String?         = nil
-    @Published var showError: Bool               = false
-    @Published var searchText: String            = ""
+    @Published var isLoading: Bool = false
+    @Published var errorMessage: String?  = nil
+    @Published var showError: Bool = false
+    @Published var searchText: String = ""
 
     private let service = FirestoreService.shared
 

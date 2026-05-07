@@ -58,9 +58,9 @@ struct EducationalInfoView: View {
                                    ?? "Not set"
                     )
                 }
-                .background(Color.white)
+                .background(Color(.systemBackground))
                 .cornerRadius(14)
-                .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 3)
+                .shadow(color: .primary.opacity(0.05), radius: 8, x: 0, y: 3)
                 .padding(.horizontal, 20)
                 .padding(.bottom, 32)
 
@@ -70,7 +70,7 @@ struct EducationalInfoView: View {
                 } label: {
                     Text("Save Changes")
                         .font(.system(size: 16, weight: .bold))
-                        .foregroundColor(.white)
+                        .foregroundColor(Color(uiColor: .systemBackground))
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 16)
                         .background(
@@ -124,13 +124,15 @@ struct EducationalInfoView: View {
                     .frame(width: 36, height: 36)
                     .background(Color(UIColor.systemBackground))
                     .clipShape(Circle())
-                    .shadow(color: .black.opacity(0.06), radius: 4, x: 0, y: 2)
+                    .shadow(color: .primary.opacity(0.06), radius: 4, x: 0, y: 2)
+                    
             }
             Spacer()
             Text("Educational Info")
                 .font(.system(size: 17, weight: .semibold))
             Spacer()
             Color.clear.frame(width: 36, height: 36)
+            
         }
         .padding(.horizontal, 20)
     }
@@ -141,23 +143,24 @@ struct EducationalInfoView: View {
             .foregroundColor(.secondary)
             .tracking(0.5)
             .frame(maxWidth: .infinity, alignment: .leading)
+        
     }
 }
 
 #Preview {
     let vm  = ProfileViewModel()
     vm.user = AppUser(
-        id:           "1",
-        uid:          "uid1",
-        username:     "Kaveen De Silva",
-        email:        "kaveen@gmail.com",
+        id: "1",
+        uid: "uid1",
+        username: "Kaveen De Silva",
+        email: "kaveen@gmail.com",
         profileImage: "",
-        university:   "NIBM",
-        major:        "Computer Science",
+        university: "NIBM",
+        major: "Computer Science",
         joinedGroups: ["g1", "g2"],
-        interests:    ["iOS", "Swift", "SwiftUI"],
-        createdAt:    Date(),
-        fcmToken:     ""
+        interests: ["iOS", "Swift", "SwiftUI"],
+        createdAt: Date(),
+        fcmToken: ""
     )
     return NavigationStack {
         EducationalInfoView(vm: vm)

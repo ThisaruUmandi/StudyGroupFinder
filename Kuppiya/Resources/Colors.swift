@@ -8,6 +8,16 @@
 import SwiftUI
 
 extension Color {
+    // Adaptive brand blue: dark navy in light mode, lighter blue in dark mode.
+    // Use this wherever brand blue appears as text/icon on a system-background surface.
+    static var brandPrimary: Color {
+        Color(UIColor { tc in
+            tc.userInterfaceStyle == .dark
+                ? UIColor(red: 107/255, green: 107/255, blue: 255/255, alpha: 1) // #6B6BFF
+                : UIColor(red: 26/255,  green: 26/255,  blue: 219/255, alpha: 1)  // #1A1ADB
+        })
+    }
+
     init(hex: String) {
         let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
         var int: UInt64 = 0

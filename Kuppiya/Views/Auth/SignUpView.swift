@@ -17,7 +17,7 @@ struct SignUpView: View {
 
     var body: some View {
         ZStack {
-            Color(UIColor.white)
+            Color(.systemBackground)
                 .ignoresSafeArea()
 
             VStack(spacing: 0) {
@@ -26,10 +26,10 @@ struct SignUpView: View {
                 VStack(spacing: 6) {
                     Text("Sign Up")
                         .font(.system(size: 28, weight: .bold))
-                        .foregroundColor(.black)
+                        .foregroundColor(.primary)
                     Text("One step closer to Group studies")
                         .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(.black)
+                        .foregroundColor(.primary)
                 }
                 .padding(.top, 48)
 
@@ -144,12 +144,12 @@ struct SignUpView: View {
                 HStack(spacing: 4) {
                     Text("Already have an account?")
                         .font(.system(size: 14))
-                        .foregroundColor(.black)
+                        .foregroundColor(.primary)
                     Button("Login") {
                         currentScreen = .login
                     }
                     .font(.system(size: 14, weight: .bold))
-                    .foregroundColor(Color(hex: "#1A1ADB"))
+                    .foregroundColor(.brandPrimary)
                 }
                 .padding(.top, 24)
 

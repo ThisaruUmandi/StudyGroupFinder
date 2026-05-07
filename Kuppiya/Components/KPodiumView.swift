@@ -8,9 +8,9 @@
 import SwiftUI
 
 struct KPodiumView: View {
-    let entries:     [LeaderboardEntry]
-    let currentUid:  String
-    let weeklyMode:  Bool
+    let entries: [LeaderboardEntry]
+    let currentUid: String
+    let weeklyMode: Bool
 
     private var first:  LeaderboardEntry? { entries.count > 0 ? entries[0] : nil }
     private var second: LeaderboardEntry? { entries.count > 1 ? entries[1] : nil }
@@ -34,10 +34,10 @@ struct KPodiumView: View {
                 // 2nd place
                 if let second {
                     KPodiumAvatar(
-                        entry:      second,
-                        rankNum:    2,
-                        size:       72,
-                        isFirst:    false,
+                        entry: second,
+                        rankNum: 2,
+                        size: 72,
+                        isFirst: false,
                         currentUid: currentUid,
                         weeklyMode: weeklyMode
                     )
@@ -47,10 +47,10 @@ struct KPodiumView: View {
                 // 1st place
                 if let first {
                     KPodiumAvatar(
-                        entry:      first,
-                        rankNum:    1,
-                        size:       96,
-                        isFirst:    true,
+                        entry: first,
+                        rankNum: 1,
+                        size: 96,
+                        isFirst: true,
                         currentUid: currentUid,
                         weeklyMode: weeklyMode
                     )
@@ -59,10 +59,10 @@ struct KPodiumView: View {
                 // 3rd place
                 if let third {
                     KPodiumAvatar(
-                        entry:      third,
-                        rankNum:    3,
-                        size:       72,
-                        isFirst:    false,
+                        entry: third,
+                        rankNum: 3,
+                        size: 72,
+                        isFirst: false,
                         currentUid: currentUid,
                         weeklyMode: weeklyMode
                     )
@@ -78,10 +78,10 @@ struct KPodiumView: View {
 // MARK: - Single Podium Avatar
 
 struct KPodiumAvatar: View {
-    let entry:      LeaderboardEntry
-    let rankNum:    Int
-    let size:       CGFloat
-    let isFirst:    Bool
+    let entry: LeaderboardEntry
+    let rankNum: Int
+    let size: CGFloat
+    let isFirst: Bool
     let currentUid: String
     let weeklyMode: Bool
 
@@ -110,8 +110,8 @@ struct KPodiumAvatar: View {
                 // Avatar with white ring
                 KUserAvatar(
                     imageURL: entry.profileImage.isEmpty ? nil : entry.profileImage,
-                    name:     entry.username,
-                    size:     size
+                    name: entry.username,
+                    size: size
                 )
                 .overlay(
                     Circle()

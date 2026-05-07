@@ -76,7 +76,7 @@ struct GlobalLeaderboardView: View {
                     .frame(width: 36, height: 36)
                     .background(Color(UIColor.systemBackground))
                     .clipShape(Circle())
-                    .shadow(color: .black.opacity(0.06), radius: 4, x: 0, y: 2)
+                    .shadow(color: .primary.opacity(0.06), radius: 4, x: 0, y: 2)
             }
             Spacer()
             Text("Global Leaderboard")
@@ -98,9 +98,9 @@ struct GlobalLeaderboardView: View {
                 }
             }
         }
-        .background(Color.white)
+        .background(Color(.systemBackground))
         .cornerRadius(16)
-        .shadow(color: .black.opacity(0.04), radius: 8, x: 0, y: 2)
+        .shadow(color: .primary.opacity(0.04), radius: 8, x: 0, y: 2)
     }
 
     private func rankRow(_ entry: LeaderboardEntry) -> some View {

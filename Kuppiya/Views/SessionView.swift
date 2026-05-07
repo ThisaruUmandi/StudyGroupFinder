@@ -57,7 +57,7 @@ struct SessionView: View {
             Button { showCreateSheet = true } label: {
                 Image(systemName: "plus")
                     .font(.system(size: 20, weight: .semibold))
-                    .foregroundColor(.white)
+                    .foregroundColor(Color(uiColor: .systemBackground))
                     .frame(width: 56, height: 56)
                     .background(Color(hex: "#0300BF"))
                     .clipShape(Circle())
@@ -94,7 +94,7 @@ struct SessionView: View {
                     .frame(width: 36, height: 36)
                     .background(Color(UIColor.systemBackground))
                     .clipShape(Circle())
-                    .shadow(color: .black.opacity(0.06), radius: 4, x: 0, y: 2)
+                    .shadow(color: .primary.opacity(0.06), radius: 4, x: 0, y: 2)
             }
             Spacer()
             Text("Sessions")
@@ -126,7 +126,7 @@ struct SessionView: View {
                     .frame(width: 42, height: 42)
                     .background(Color(UIColor.systemBackground))
                     .cornerRadius(12)
-                    .shadow(color: .black.opacity(0.06), radius: 4, x: 0, y: 2)
+                    .shadow(color: .primary.opacity(0.06), radius: 4, x: 0, y: 2)
             }
             .popover(isPresented: $showFilterMenu) {
                 filterMenu.presentationCompactAdaptation(.popover)

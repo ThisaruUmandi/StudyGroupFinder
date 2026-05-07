@@ -30,7 +30,7 @@ struct PollView: View {
             Button { showCreate = true } label: {
                 Image(systemName: "plus")
                     .font(.system(size: 20, weight: .semibold))
-                    .foregroundColor(.white)
+                    .foregroundColor(Color(uiColor: .systemBackground))
                     .frame(width: 56, height: 56)
                     .background(Color(hex: "#0300BF"))
                     .clipShape(Circle())
@@ -97,9 +97,13 @@ struct PollView: View {
                             .background(
                                 vm.selectedFilter == index
                                     ? Color(hex: "#0300BF")
-                                    : Color.white
+                                    : Color(.systemBackground)
                             )
-                            .clipShape(Capsule())
+                            .clipShape(Capsule()).overlay {
+                                RoundedRectangle(cornerRadius: 50
+                                )
+                                .stroke(Color.gray.opacity(0.4), lineWidth: 0.5)
+                            }
                             .padding(.horizontal, 5)
                             .shadow(color: .black.opacity(0.06), radius: 4, x: 0, y: 2)
                     }

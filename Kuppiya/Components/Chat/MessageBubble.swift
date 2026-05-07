@@ -8,11 +8,11 @@
 import SwiftUI
 
 struct MessageBubble: View {
-    let message:    Message
+    let message: Message
     let currentUid: String
-    let onReply:    () -> Void
-    let onReact:    () -> Void
-    let onDelete:   () -> Void
+    let onReply: () -> Void
+    let onReact: () -> Void
+    let onDelete: () -> Void
 
     @State private var showActions = false
 
@@ -137,7 +137,7 @@ struct MessageBubble: View {
             if message.senderId == currentUid {
                 Divider().frame(height: 32)
                 actionButton(
-                    icon:  "trash",
+                    icon: "trash",
                     label: "Delete",
                     color: Color(hex: "#D85A30")
                 ) {

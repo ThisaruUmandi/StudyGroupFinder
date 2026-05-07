@@ -50,9 +50,9 @@ struct LocationPickerView: View {
                     }
                     .padding(.horizontal, 14)
                     .padding(.vertical, 11)
-                    .background(Color.white)
+                    .background(Color(.systemBackground))
                     .cornerRadius(12)
-                    .shadow(color: .black.opacity(0.1), radius: 6, x: 0, y: 3)
+                    .shadow(color: .primary.opacity(0.1), radius: 6, x: 0, y: 3)
                     .padding(.horizontal, 16)
                     .padding(.top, 12)
 
@@ -85,9 +85,9 @@ struct LocationPickerView: View {
                                 Divider().padding(.leading, 14)
                             }
                         }
-                        .background(Color.white)
+                        .background(Color(.systemBackground))
                         .cornerRadius(12)
-                        .shadow(color: .black.opacity(0.1), radius: 6, x: 0, y: 3)
+                        .shadow(color: .primary.opacity(0.1), radius: 6, x: 0, y: 3)
                         .padding(.horizontal, 16)
                         .padding(.top, 4)
                     }

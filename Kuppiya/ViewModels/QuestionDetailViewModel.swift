@@ -12,12 +12,12 @@ import Combine
 
 @MainActor
 class QuestionDetailViewModel: ObservableObject {
-    @Published var answers:      [Answer] = []
-    @Published var answerText    = ""
-    @Published var isLoading     = false
-    @Published var isPosting     = false
-    @Published var showError     = false
-    @Published var errorMessage  = ""
+    @Published var answers: [Answer] = []
+    @Published var answerText = ""
+    @Published var isLoading = false
+    @Published var isPosting = false
+    @Published var showError = false
+    @Published var errorMessage = ""
 
     private let service  = FirestoreService.shared
     var currentUid: String { Auth.auth().currentUser?.uid ?? "" }
@@ -32,7 +32,7 @@ class QuestionDetailViewModel: ObservableObject {
             )
         } catch {
             errorMessage = error.localizedDescription
-            showError    = true
+            showError = true
         }
     }
 
@@ -44,11 +44,11 @@ class QuestionDetailViewModel: ObservableObject {
         defer { isPosting = false }
         do {
             try await service.postAnswer(
-                groupId:    groupId,
+                groupId: groupId,
                 questionId: questionId,
-                authorId:   currentUid,
+                authorId: currentUid,
                 authorName: authorName,
-                body:       answerText.trimmingCharacters(in: .whitespaces)
+                body: answerText.trimmingCharacters(in: .whitespaces)
             )
             answerText = ""
             await load(groupId: groupId, questionId: questionId)
@@ -63,16 +63,16 @@ class QuestionDetailViewModel: ObservableObject {
         guard let questionId = question.id else { return }
         do {
             try await service.markBestAnswer(
-                groupId:    groupId,
+                groupId: groupId,
                 questionId: questionId,
-                answerId:   answer.answerId,
-                authorId:   answer.authorId,
+                answerId: answer.answerId,
+                authorId: answer.authorId,
                 authorName: answer.authorName
             )
             await load(groupId: groupId, questionId: questionId)
         } catch {
             errorMessage = error.localizedDescription
-            showError    = true
+            showError = true
         }
     }
 
@@ -82,16 +82,16 @@ class QuestionDetailViewModel: ObservableObject {
         let isUpvoted = answer.upvotes.contains(currentUid)
         do {
             try await service.toggleAnswerUpvote(
-                groupId:    groupId,
+                groupId: groupId,
                 questionId: questionId,
-                answerId:   answer.answerId,
-                uid:        currentUid,
-                isUpvoted:  isUpvoted
+                answerId: answer.answerId,
+                uid: currentUid,
+                isUpvoted: isUpvoted
             )
             await load(groupId: groupId, questionId: questionId)
         } catch {
             errorMessage = error.localizedDescription
-            showError    = true
+            showError = true
         }
     }
 }

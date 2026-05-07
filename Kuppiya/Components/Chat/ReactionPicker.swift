@@ -8,8 +8,8 @@
 import SwiftUI
 
 struct ReactionPicker: View {
-    let emojis   = ["👍","❤️","😂","😮","😢","🔥"]
-    let onPick:  (String) -> Void
+    let emojis = ["👍","❤️","😂","😮","😢","🔥"]
+    let onPick: (String) -> Void
     let onDismiss: () -> Void
 
     var body: some View {

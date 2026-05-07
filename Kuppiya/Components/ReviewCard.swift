@@ -4,12 +4,6 @@
 //
 //  Created by M H T U De Silva on 2026-04-27.
 //
-//
-//  ReviewCard.swift
-//  Kuppiya
-//
-//  Created by M H T U De Silva on 2026-04-25.
-//
 
 import SwiftUI
 
@@ -40,7 +34,7 @@ struct ReviewCard: View {
             }
         }
         .padding(14)
-        .background(Color.white)
+        .background(Color(.systemBackground))
         .cornerRadius(12)
         .overlay(
             RoundedRectangle(cornerRadius: 12)

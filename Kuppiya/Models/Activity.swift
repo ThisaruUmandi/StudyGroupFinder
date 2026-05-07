@@ -25,8 +25,8 @@ struct Activity: Codable, Identifiable {
 
     var timeAgo: String {
         let diff = Date().timeIntervalSince(createdAt)
-        if diff < 60    { return "just now" }
-        if diff < 3600  { return "\(Int(diff/60))m ago" }
+        if diff < 60 { return "just now" }
+        if diff < 3600 { return "\(Int(diff/60))m ago" }
         if diff < 86400 { return "\(Int(diff/3600))h ago" }
         return "\(Int(diff/86400))d ago"
     }

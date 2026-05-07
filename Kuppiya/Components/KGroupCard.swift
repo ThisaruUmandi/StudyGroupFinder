@@ -26,7 +26,7 @@ struct KGroupCard: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(group.name)
                         .font(.system(size: 15, weight: .semibold))
-                        .foregroundColor(.black)
+                        .foregroundColor(.primary)
                         .lineLimit(1)
 
                     HStack(spacing: 6) {
@@ -65,7 +65,7 @@ struct KGroupCard: View {
             }
             .padding(.horizontal, 10)
             .padding(.vertical, 14)
-            .background(Color.white)
+            .background(Color(.systemBackground))
             .cornerRadius(16)
             .shadow(color: .black.opacity(0.1),
                     radius: 6, x: 0, y: 2)

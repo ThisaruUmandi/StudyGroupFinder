@@ -8,15 +8,15 @@ import Combine
 class GroupSettingsViewModel: ObservableObject {
 
     // MARK: - Editable fields
-    @Published var name: String        = ""
-    @Published var subject: String     = ""
+    @Published var name: String = ""
+    @Published var subject: String = ""
     @Published var description: String = ""
-    @Published var isPublic: Bool      = true
+    @Published var isPublic: Bool = true
 
     // MARK: - Image
-    @Published var showImagePicker: Bool   = false
+    @Published var showImagePicker: Bool = false
     @Published var selectedImage: UIImage? = nil
-    @Published var isUploadingImage: Bool  = false
+    @Published var isUploadingImage: Bool = false
 
     // MARK: - Members
     @Published var members: [AppUser]  = []
@@ -25,22 +25,22 @@ class GroupSettingsViewModel: ObservableObject {
     @Published var joinRequests: [JoinRequest] = []
 
     // MARK: - Add Members
-    @Published var showAddMembers: Bool       = false
+    @Published var showAddMembers: Bool = false
     @Published var selectedMembers: [AppUser] = []
 
     // MARK: - Review
     @Published var showReviewSheet: Bool = false
-    @Published var rating: Int           = 0
+    @Published var rating: Int = 0
     @Published var reviewText: String    = ""
 
     // MARK: - State
-    @Published var isLoading: Bool        = false
-    @Published var isSaving: Bool         = false
-    @Published var showError: Bool        = false
+    @Published var isLoading: Bool = false
+    @Published var isSaving: Bool = false
+    @Published var showError: Bool = false
     @Published var errorMessage: String?
     @Published var showLeaveConfirm: Bool = false
-    @Published var didLeaveGroup: Bool    = false
-    //@Published var didSave: Bool          = false
+    @Published var didLeaveGroup: Bool = false
+    //@Published var didSave: Bool = false
 
     private let service = FirestoreService.shared
 
