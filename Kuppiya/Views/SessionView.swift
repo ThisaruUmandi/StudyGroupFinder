@@ -100,11 +100,11 @@ struct SessionView: View {
             Text("Sessions")
                 .font(.system(size: 17, weight: .semibold))
             Spacer()
-            Image("oboy_r")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 54)
-                .offset(y: -6)
+//            Image("oboy_l")
+//                .resizable()
+//                .scaledToFit()
+//                .frame(width: 54)
+//                .offset(y: -6)
         }
         .padding(.horizontal, 20)
     }

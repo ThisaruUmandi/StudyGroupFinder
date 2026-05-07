@@ -74,7 +74,7 @@ struct KQuestionCard: View {
                         HStack(spacing: 4) {
                             Image(systemName: isUpvoted
                                   ? "hand.thumbsup.fill"
-                                  : "hand.thumbsup.up")
+                                  : "hand.thumbsup")
                                 .font(.system(size: 13))
                                 .foregroundColor(isUpvoted
                                                  ? Color(hex: "#0300BF")

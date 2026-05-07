@@ -89,7 +89,7 @@ struct CreatePollView: View {
                         } else {
                             Image(systemName: "paperplane.fill")
                                 .font(.system(size: 15))
-                            Text("Create Poll · +15 pts")
+                            Text("Create Poll")
                                 .font(.system(size: 16, weight: .bold))
                         }
                     }
