@@ -16,7 +16,7 @@ struct DiscoverGroupsView: View {
 
     var body: some View {
         ZStack {
-            Color(UIColor.systemGroupedBackground).ignoresSafeArea()
+            Color(UIColor.systemGroupedBackground).opacity(0.5)
 
             if viewModel.isLoading {
                 ProgressView().scaleEffect(1.2)
@@ -86,10 +86,11 @@ struct DiscoverGroupsView: View {
                 .scaledToFit()
                 .frame(width: 110)
                 .padding(.bottom, -8)
+                .padding(.trailing, -25)
         }
         .padding(.horizontal, 20)
         .padding(.top, 16)
-        .padding(.bottom, 8)
+        .padding(.bottom, 25)
         .background(Color(UIColor.systemGroupedBackground))
     }
 

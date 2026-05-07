@@ -281,7 +281,14 @@ class StudyProgressService {
     private func updateUserStats(
         uid: String, pointsDelta: Int, hoursDelta: Double
     ) async throws {
+        let userDoc  = try await db.collection("users").document(uid).getDocument()
+        let username = userDoc.data()?["username"]     as? String ?? ""
+        let image    = userDoc.data()?["profileImage"] as? String ?? ""
+
         var updates: [String: Any] = [
+            "uid":          uid,
+            "username":     username,
+            "profileImage": image,
             "totalPoints":  FieldValue.increment(Int64(pointsDelta)),
             "weeklyPoints": FieldValue.increment(Int64(pointsDelta)),
             "lastUpdated":  Timestamp(date: Date())

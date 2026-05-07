@@ -20,7 +20,7 @@ struct KSessionCard: View {
 
     // Purple for ongoing, brand blue for upcoming
     private var cardColor: Color {
-        isOngoing ? Color(hex: "#5B3FBF") : Color(hex: "#0300BF")
+        isOngoing ? Color(hex: "#5B3FBF").opacity(0.75) : Color(hex: "#1893DD")
     }
 
     var body: some View {

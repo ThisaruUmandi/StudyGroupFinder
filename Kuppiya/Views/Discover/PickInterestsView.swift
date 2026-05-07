@@ -72,6 +72,7 @@ struct PickInterestsView: View {
                 .scaledToFit()
                 .frame(width: 110)
                 .padding(.bottom, -8)
+                .padding(.trailing, -25)
         }
         .padding(.horizontal, 24)
         .padding(.top, 16)
