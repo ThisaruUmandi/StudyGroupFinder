@@ -14,12 +14,13 @@ struct GroupDashboardView: View {
 
     @State var group: StudyGroup
     @State private var showAllSessions  = false
-    @State private var showSettings     = false
+    @State private var showAllActivities = false
+    @State private var showSettings = false
     @State private var navigateToSessions  = false
-    @State private var navigateToChat      = false
+    @State private var navigateToChat = false
     @State private var navigateToResources = false
-    @State private var navigateToQnA      = false
-    @State private var navigateToPolls    = false
+    @State private var navigateToQnA = false
+    @State private var navigateToPolls = false
     @State private var navigateToProgress = false
 
     var body: some View {
@@ -220,9 +221,13 @@ struct GroupDashboardView: View {
                     .font(.system(size: 17, weight: .bold))
                 Spacer()
                 if !viewModel.activities.isEmpty {
-                    Button("See All") { }
-                        .font(.system(size: 13))
-                        .foregroundColor(.brandPrimary)
+                    Button(showAllActivities ? "Show Less" : "See All") {
+                        withAnimation(.easeInOut(duration: 0.25)) {
+                            showAllActivities.toggle()
+                        }
+                    }
+                    .font(.system(size: 13))
+                    .foregroundColor(.brandPrimary)
                 }
             }
             .padding(.horizontal, 20)
@@ -235,9 +240,13 @@ struct GroupDashboardView: View {
                 emptyCard(icon: "clock.arrow.circlepath", message: "No activities yet")
             } else {
                 VStack(spacing: 0) {
-                    ForEach(Array(viewModel.activities.enumerated()), id: \.element.id) { index, activity in
+                    let displayed = showAllActivities
+                        ? viewModel.activities
+                        : Array(viewModel.activities.prefix(3))
+
+                    ForEach(Array(displayed.enumerated()), id: \.element.id) { index, activity in
                         ActivityRow(activity: activity)
-                        if index < viewModel.activities.count - 1 {
+                        if index < displayed.count - 1 {
                             Divider().padding(.leading, 72)
                         }
                     }

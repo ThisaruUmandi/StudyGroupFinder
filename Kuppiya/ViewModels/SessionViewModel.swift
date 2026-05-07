@@ -16,7 +16,13 @@ class SessionViewModel: ObservableObject {
     @Published var showError = false
     @Published var errorMessage: String?
 
-    private let service = FirestoreService.shared
+    //private let service = FirestoreService.shared
+    private let service: GroupSessionServicing
+
+    init(service: GroupSessionServicing = FirestoreService.shared) {
+        self.service = service
+    }
+
 
     enum SessionFilter: String, CaseIterable {
         case all = "All"

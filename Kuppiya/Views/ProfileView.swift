@@ -12,11 +12,11 @@ struct ProfileView: View {
     @AppStorage("appColorScheme") private var appColorScheme = "system"
     @AppStorage("biometricEnabled") private var biometricEnabled = false
 
-    @State private var navigateToPersonal    = false
+    @State private var navigateToPersonal = false
     @State private var navigateToEducational = false
     @State private var navigateToLeaderboard = false
-    @State private var showLogoutAlert       = false
-    @State private var showPasswordAlert     = false
+    @State private var showLogoutAlert  = false
+    @State private var showPasswordAlert = false
     @State private var selectedPhoto: PhotosPickerItem? = nil
 
     var body: some View {
@@ -62,17 +62,13 @@ struct ProfileView: View {
         }
         .alert("Log Out?", isPresented: $showLogoutAlert) {
             Button("Log Out", role: .destructive) {
-                do {
-                    try vm.signOut()
-                } catch {
-                    vm.errorMessage = error.localizedDescription
-                    vm.showError    = true
-                }
+                authVM.signOut() 
             }
             Button("Cancel", role: .cancel) {}
         } message: {
             Text("Are you sure you want to log out?")
         }
+        
         .alert("Reset Password?", isPresented: $showPasswordAlert) {
             Button("Send Reset Email") {
                 Task { await vm.sendPasswordReset() }

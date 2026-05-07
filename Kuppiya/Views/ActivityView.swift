@@ -11,6 +11,7 @@ import PDFKit
 struct ActivityView: View {
     @StateObject private var vm = ActivityViewModel()
     @EnvironmentObject var authVM: AuthViewModel
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
         ZStack(alignment: .bottomLeading) {
@@ -35,8 +36,22 @@ struct ActivityView: View {
 //                .offset(y: -90)
         }
         .navigationBarHidden(true)
-        .onAppear { Task { await vm.loadAll() } }
+//        .onAppear { Task { await vm.loadAll() } }
+        .onAppear {
+            vm.isOffline = !NetworkMonitor.shared.isConnected
+            Task { await vm.loadAll() }
+        }
         .onChange(of: vm.selectedTab) { _, _ in Task { await vm.loadAll() } }
+        
+        .onChange(of: scenePhase) { _, phase in          // ← add here
+            if phase == .active {
+                vm.isOffline = !NetworkMonitor.shared.isConnected
+                if !vm.isOffline {
+                    Task { await vm.loadAll() }
+                }
+            }
+        }
+        
         // File preview sheet
         .sheet(isPresented: $vm.showFilePreview) {
             if let url = vm.fileToOpen {

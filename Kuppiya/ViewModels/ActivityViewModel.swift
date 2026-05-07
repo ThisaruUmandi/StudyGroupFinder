@@ -52,23 +52,22 @@ class ActivityViewModel: ObservableObject {
 //    }
     
     init() {
-        // Set initial state
         isOffline = !NetworkMonitor.shared.isConnected
 
-        // Observe changes
         NetworkMonitor.shared.$isConnected
             .removeDuplicates()
-            .dropFirst() // Skip initial value — we set it manually above
-            .receive(on: DispatchQueue.main)
+            .receive(on: DispatchQueue.main)  // ← removed .dropFirst()
             .sink { [weak self] connected in
                 guard let self else { return }
+                let wasOffline = self.isOffline
                 self.isOffline = !connected
-                if connected {
+                if connected && wasOffline {
+                    // Only reload if we were actually offline before
                     Task {
                         try? await Task.sleep(nanoseconds: 500_000_000)
                         await self.loadAll()
                     }
-                } else {
+                } else if !connected {
                     self.favourites = []
                     self.bookmarked = []
                 }

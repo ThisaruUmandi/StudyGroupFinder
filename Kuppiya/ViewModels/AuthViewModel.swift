@@ -34,8 +34,19 @@ class AuthViewModel: ObservableObject {
     @Published var resetEmailSent = false
 
     // MARK: - Services
-    private let authService = FirebaseAuthService.shared
-    private let biometricService = BiometricService.shared
+//    private let authService = FirebaseAuthService.shared
+//    private let biometricService = BiometricService.shared
+    private let authService: AuthServicing
+    private let biometricService: BiometricServicing
+
+    init(
+        authService: AuthServicing = FirebaseAuthService.shared,
+        biometricService: BiometricServicing = BiometricService.shared
+    ) {
+        self.authService = authService
+        self.biometricService = biometricService
+    }
+
 
     // MARK: - Computed
     var isBiometricAvailable: Bool {

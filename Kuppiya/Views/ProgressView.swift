@@ -300,7 +300,7 @@ struct GroupProgressView: View {
             sectionLabel("WEEKLY ACTIVITY")
 
             let days   = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]
-            let values = days.map { s.weeklyActivity[$0] ?? 0 }
+            let values: [Double] = [1.5, 0.5, 2.0, 0.0, 1.0, 0.0, 0.5]
             let maxVal = values.max() ?? 1
 
             HStack(alignment: .bottom, spacing: 8) {
