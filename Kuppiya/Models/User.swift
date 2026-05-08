@@ -15,14 +15,23 @@ struct AppUser: Codable, Identifiable {
     var email: String
     var profileImage: String
     var university: String
-    //var major: String
+    var major: String
     var joinedGroups: [String]
+    var interests: [String]
     var createdAt: Date
     var fcmToken: String
 
     enum CodingKeys: String, CodingKey {
-        case id, uid, username, email,
-             profileImage, university,
-             joinedGroups, createdAt, fcmToken
+        case id,
+             uid,
+             username,
+             email,
+             profileImage,
+             university,
+             major,
+             interests,
+             joinedGroups,
+             createdAt,
+             fcmToken
     }
 }

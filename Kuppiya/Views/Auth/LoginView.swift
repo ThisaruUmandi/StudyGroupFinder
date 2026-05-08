@@ -11,15 +11,15 @@ import SwiftUI
 struct LoginView: View {
     @EnvironmentObject var authViewModel: AuthViewModel
     @Binding var currentScreen: AppNavigationView.Screen
-    @State private var showPassword    = false
+    @State private var showPassword = false
     @State private var showForgotSheet = false
-    @State private var resetEmail      = ""
+    @State private var resetEmail = ""
 
     private let biometric = BiometricService.shared
 
     var body: some View {
         ZStack {
-            Color(UIColor.white).ignoresSafeArea()
+            Color(.systemBackground).ignoresSafeArea()
 
             VStack(spacing: 0) {
 
@@ -27,10 +27,10 @@ struct LoginView: View {
                 VStack(spacing: 6) {
                     Text("Login")
                         .font(.system(size: 32, weight: .bold))
-                        .foregroundColor(.black)
+                        .foregroundColor(.primary)
                     Text("Welcome back to Kuppiya!")
                         .font(.system(size: 16, weight: .medium))
-                        .foregroundColor(.black)
+                        .foregroundColor(.primary)
                         .padding(.top, 5)
                 }
                 .padding(.top, 48)
@@ -77,7 +77,7 @@ struct LoginView: View {
                                 showForgotSheet = true
                             }
                             .font(.system(size: 13))
-                            .foregroundColor(.black)
+                            .foregroundColor(.brandPrimary)
                         }
                         .padding(.horizontal, 4)
                         .padding(.top, 0)
@@ -144,7 +144,7 @@ struct LoginView: View {
                             Circle()
                                 .stroke(
                                     biometric.hasSavedCredentials
-                                    ? Color(hex: "#0300BF")
+                                    ? Color.brandPrimary
                                     : Color.gray.opacity(0.3),
                                     lineWidth: biometric.hasSavedCredentials ? 2 : 1
                                 )
@@ -155,7 +155,7 @@ struct LoginView: View {
                                 .frame(width: 26, height: 26)
                                 .foregroundColor(
                                     biometric.hasSavedCredentials
-                                    ? Color(hex: "#0300BF")
+                                    ? .brandPrimary
                                     : .gray
                                 )
                         }
@@ -183,12 +183,12 @@ struct LoginView: View {
                 HStack(spacing: 4) {
                     Text("Don't have an account?")
                         .font(.system(size: 14))
-                        .foregroundColor(.black)
+                        .foregroundColor(.primary)
                     Button("Sign Up") {
                         currentScreen = .signup
                     }
                     .font(.system(size: 14, weight: .bold))
-                    .foregroundColor(Color(hex: "#0300BF"))
+                    .foregroundColor(.brandPrimary)
                 }
                 .padding(.top, 30)
                 .padding(.bottom, 15)

@@ -12,7 +12,7 @@ import Security
 class BiometricService {
     static let shared = BiometricService()
 
-    private let emailKey    = "kuppiya_email"
+    private let emailKey = "kuppiya_email"
     private let passwordKey = "kuppiya_password"
 
     // MARK: - Check availability
@@ -68,9 +68,9 @@ class BiometricService {
     private func saveToKeychain(key: String, value: String) {
         let data = value.data(using: .utf8)!
         let query: [String: Any] = [
-            kSecClass as String       : kSecClassGenericPassword,
+            kSecClass as String : kSecClassGenericPassword,
             kSecAttrAccount as String : key,
-            kSecValueData as String   : data
+            kSecValueData as String : data
         ]
         SecItemDelete(query as CFDictionary)
         SecItemAdd(query as CFDictionary, nil)
@@ -78,10 +78,10 @@ class BiometricService {
 
     private func loadFromKeychain(key: String) -> String? {
         let query: [String: Any] = [
-            kSecClass as String       : kSecClassGenericPassword,
+            kSecClass as String : kSecClassGenericPassword,
             kSecAttrAccount as String : key,
-            kSecReturnData as String  : true,
-            kSecMatchLimit as String  : kSecMatchLimitOne
+            kSecReturnData as String : true,
+            kSecMatchLimit as String : kSecMatchLimitOne
         ]
         var result: AnyObject?
         SecItemCopyMatching(query as CFDictionary, &result)
@@ -91,9 +91,51 @@ class BiometricService {
 
     private func deleteFromKeychain(key: String) {
         let query: [String: Any] = [
-            kSecClass as String       : kSecClassGenericPassword,
+            kSecClass as String : kSecClassGenericPassword,
             kSecAttrAccount as String : key
         ]
         SecItemDelete(query as CFDictionary)
     }
+    
+    // Profile - biometrics
+
+    var biometricType: LABiometryType {
+        let context = LAContext()
+        _ = context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: nil)
+        return context.biometryType
+    }
+
+    var biometricLabel: String {
+        switch biometricType {
+        case .faceID:  return "Face ID"
+        case .touchID: return "Touch ID"
+        default: return "Biometrics"
+        }
+    }
+
+    var biometricIcon: String {
+        switch biometricType {
+        case .faceID: return "faceid"
+        case .touchID: return "touchid"
+        default: return "lock.shield"
+        }
+    }
+
+    var isAvailable: Bool {
+        isBiometricAvailable
+    }
+
+    func authenticate(reason: String) async -> Bool {
+        let context = LAContext()
+        context.localizedCancelTitle = "Use Password"
+        do {
+            return try await context.evaluatePolicy(
+                .deviceOwnerAuthenticationWithBiometrics,
+                localizedReason: reason
+            )
+        } catch {
+            return false
+        }
+    }
+    
 }

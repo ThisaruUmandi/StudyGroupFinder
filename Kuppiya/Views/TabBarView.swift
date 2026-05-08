@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct TabBarView: View {
+    @EnvironmentObject var authVM: AuthViewModel
     @StateObject private var tabManager = TabBarViewModel()
 
     var body: some View {
@@ -17,28 +18,30 @@ struct TabBarView: View {
                     Tab(value: .home) {
                         //Text("Home")
                         HomeView()
+                            .environmentObject(authVM)
                             .toolbarVisibility(.hidden, for: .tabBar)
                     }
                     Tab(value: .groups) {
-                        Text("My Groups")
-                        //MapView()
+                        //Text("My Groups")
+                        GroupsView()
+                            .environmentObject(authVM)
                             .toolbarVisibility(.hidden, for: .tabBar)
                     }
                     Tab(value: .activity) {
-                        Text("Activity")
-                        //ActivityView()
+                        //Text("Activity")
+                        ActivityView()
                             .toolbarVisibility(.hidden, for: .tabBar)
                     }
                     Tab(value: .profile) {
-                        Text("Profile")
-                        //AccountView()
+                        //Text("Profile")
+                        ProfileView()
                             .toolbarVisibility(.hidden, for: .tabBar)
                     }
                 }
 
                 if !tabManager.isTabBarHidden {
                     CustomTabBar(activeTab: $tabManager.activeTab)
-                        .shadow(color: .black.opacity(0.15), radius: 10)
+                        .shadow(color: .primary.opacity(0.15), radius: 10)
                         .padding(.bottom, 8)
                 }
             }
@@ -61,4 +64,5 @@ extension UIView {
 
 #Preview {
     TabBarView()
+        .environmentObject(AuthViewModel())
 }

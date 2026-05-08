@@ -23,7 +23,7 @@ struct SocialButton: View {
                         .resizable()
                         .scaledToFit()
                         .frame(width: 23, height: 23)
-                        .foregroundColor(.black)
+                        .foregroundColor(.primary)
                 } else {
                     Image(imageName)
                         .resizable()

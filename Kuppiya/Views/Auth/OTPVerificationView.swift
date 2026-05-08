@@ -27,7 +27,7 @@ struct OTPVerificationView: View {
                     } label: {
                         Image(systemName: "chevron.left")
                             .font(.system(size: 16, weight: .medium))
-                            .foregroundColor(.black)
+                            .foregroundColor(.primary)
                     }
                     Spacer()
                 }
@@ -39,7 +39,7 @@ struct OTPVerificationView: View {
                 VStack(spacing: 8) {
                     Text("Verify Your Email")
                         .font(.system(size: 26, weight: .bold))
-                        .foregroundColor(.black)
+                        .foregroundColor(.primary)
 
                     Text("A verification link was sent to")
                         .font(.system(size: 14))
@@ -47,20 +47,20 @@ struct OTPVerificationView: View {
 
                     Text(email)
                         .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(Color(hex: "#1A1ADB"))
+                        .foregroundColor(.brandPrimary)
                 }
                 .padding(.bottom, 40)
 
                 // Info box
                 HStack(spacing: 10) {
                     Image(systemName: "info.circle.fill")
-                        .foregroundColor(Color(hex: "#1A1ADB"))
+                        .foregroundColor(.brandPrimary)
                     Text("Click the link in your email, then tap Verify below")
                         .font(.system(size: 13))
-                        .foregroundColor(.gray)
+                        .foregroundColor(.secondary)
                 }
                 .padding(14)
-                .background(Color(hex: "#E6F1FB"))
+                .background(Color.brandPrimary.opacity(0.08))
                 .cornerRadius(12)
                 .padding(.horizontal, 32)
                 .padding(.bottom, 32)
@@ -94,7 +94,7 @@ struct OTPVerificationView: View {
                             Task { await viewModel.resendCode() }
                         }
                         .font(.system(size: 13, weight: .bold))
-                        .foregroundColor(Color(hex: "#1A1ADB"))
+                        .foregroundColor(.brandPrimary)
                     }
                 }
                 .padding(.top, 16)

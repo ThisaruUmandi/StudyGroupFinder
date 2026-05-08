@@ -5,37 +5,6 @@
 //  Created by M H T U De Silva on 2026-04-01.
 //
 
-//import SwiftUI
-//import Firebase
-//
-//@main
-//struct KuppiyaApp: App {
-//    
-//    @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
-//    
-////    init(){
-////        FirebaseApp.configure()
-////        print("Configured Firebase!")
-////    }
-//    
-//    var body: some Scene {
-//        WindowGroup {
-//            ContentView()
-//        }
-//    }
-//}
-//
-//class AppDelegate: NSObject, UIApplicationDelegate {
-//    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
-//        FirebaseApp.configure()
-//        //print("Configured Firebase!")
-//        return true
-//    }
-//}
-
-//  KuppiyaApp.swift
-//  Kuppiya
-
 import SwiftUI
 import FirebaseCore
 import GoogleSignIn
@@ -43,6 +12,7 @@ import GoogleSignIn
 @main
 struct KuppiyaApp: App {
     @StateObject private var authVM = AuthViewModel()
+    @AppStorage("appColorScheme") private var appColorScheme = "system"
 
     init() {
         FirebaseApp.configure()
@@ -59,10 +29,18 @@ struct KuppiyaApp: App {
                         .environmentObject(authVM)
                 }
             }
+            .preferredColorScheme(colorScheme)
         }
         // Required for Google Sign-In URL handling
 //        .onOpenURL { url in
 //            GIDSignIn.sharedInstance.handle(url)
 //        }
     }
+    private var colorScheme: ColorScheme? {
+            switch appColorScheme {
+            case "light": return .light
+            case "dark": return .dark
+            default: return nil  // nil = follows system
+            }
+        }
 }

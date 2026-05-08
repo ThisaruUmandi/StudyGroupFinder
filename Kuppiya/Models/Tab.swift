@@ -16,11 +16,11 @@ enum TabModel: String, CaseIterable {
 
     var title: String {
         switch self {
-        case .home:     "Home"
+        case .home:  "Home"
         case .groups: "Groups"
         case .activity: "Activity"
-        case .profile:  "Profile"
-        case .none:     ""
+        case .profile: "Profile"
+        case .none: ""
         }
     }
 
@@ -28,9 +28,9 @@ enum TabModel: String, CaseIterable {
         switch self {
         case .home: "home"
         case .groups: "group"
-        case .activity: "activity"
-        case .profile:  "profile"
-        case .none:     ""
+        case .activity:"activity"
+        case .profile: "profile"
+        case .none: ""
         }
     }
 

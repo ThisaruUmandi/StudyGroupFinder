@@ -12,7 +12,6 @@
 		3307D9A92F8280B600ED213E /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 3307D9A82F8280B600ED213E /* FirebaseAnalytics */; };
 		3307D9AB2F8280B600ED213E /* FirebaseAnalyticsCore in Frameworks */ = {isa = PBXBuildFile; productRef = 3307D9AA2F8280B600ED213E /* FirebaseAnalyticsCore */; };
 		3307D9AD2F8280B600ED213E /* FirebaseAnalyticsIdentitySupport in Frameworks */ = {isa = PBXBuildFile; productRef = 3307D9AC2F8280B600ED213E /* FirebaseAnalyticsIdentitySupport */; };
-		3307D9AF2F8280B600ED213E /* FirebaseAppCheck in Frameworks */ = {isa = PBXBuildFile; productRef = 3307D9AE2F8280B600ED213E /* FirebaseAppCheck */; };
 		3307D9B12F8280B600ED213E /* FirebaseAppDistribution-Beta in Frameworks */ = {isa = PBXBuildFile; productRef = 3307D9B02F8280B600ED213E /* FirebaseAppDistribution-Beta */; };
 		3307D9B32F8280B600ED213E /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 3307D9B22F8280B600ED213E /* FirebaseAuth */; };
 		3307D9B52F8280B600ED213E /* FirebaseAuthCombine-Community in Frameworks */ = {isa = PBXBuildFile; productRef = 3307D9B42F8280B600ED213E /* FirebaseAuthCombine-Community */; };
@@ -58,9 +57,22 @@
 		3319DB212F7CB888000A3BD3 /* KuppiyaUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = KuppiyaUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		339FECC52FA2313F00D29D8E /* Exceptions for "Kuppiya" folder in "Kuppiya" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 3319DB092F7CB886000A3BD3 /* Kuppiya */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		3319DB0C2F7CB886000A3BD3 /* Kuppiya */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				339FECC52FA2313F00D29D8E /* Exceptions for "Kuppiya" folder in "Kuppiya" target */,
+			);
 			path = Kuppiya;
 			sourceTree = "<group>";
 		};
@@ -102,7 +114,6 @@
 				3307D9A92F8280B600ED213E /* FirebaseAnalytics in Frameworks */,
 				3307D9CD2F8280B600ED213E /* FirebasePerformance in Frameworks */,
 				3307D9B72F8280B600ED213E /* FirebaseCore in Frameworks */,
-				3307D9AF2F8280B600ED213E /* FirebaseAppCheck in Frameworks */,
 				3307D9AB2F8280B600ED213E /* FirebaseAnalyticsCore in Frameworks */,
 				3307D9C12F8280B600ED213E /* FirebaseFunctions in Frameworks */,
 				3307D9B32F8280B600ED213E /* FirebaseAuth in Frameworks */,
@@ -180,7 +191,6 @@
 				3307D9A82F8280B600ED213E /* FirebaseAnalytics */,
 				3307D9AA2F8280B600ED213E /* FirebaseAnalyticsCore */,
 				3307D9AC2F8280B600ED213E /* FirebaseAnalyticsIdentitySupport */,
-				3307D9AE2F8280B600ED213E /* FirebaseAppCheck */,
 				3307D9B02F8280B600ED213E /* FirebaseAppDistribution-Beta */,
 				3307D9B22F8280B600ED213E /* FirebaseAuth */,
 				3307D9B42F8280B600ED213E /* FirebaseAuthCombine-Community */,
@@ -488,8 +498,12 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = ALSD76WV2B;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Kuppiya/Info.plist;
+				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "We need your location to set the meeting place for physical sessions.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "We need your location to set the meeting place for physical sessions.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -519,8 +533,12 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = ALSD76WV2B;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Kuppiya/Info.plist;
+				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "We need your location to set the meeting place for physical sessions.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "We need your location to set the meeting place for physical sessions.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -708,11 +726,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 3307D9A22F82709D00ED213E /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseAnalyticsIdentitySupport;
-		};
-		3307D9AE2F8280B600ED213E /* FirebaseAppCheck */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 3307D9A22F82709D00ED213E /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
-			productName = FirebaseAppCheck;
 		};
 		3307D9B02F8280B600ED213E /* FirebaseAppDistribution-Beta */ = {
 			isa = XCSwiftPackageProductDependency;

@@ -45,8 +45,9 @@ class FirebaseAuthService {
             email: email,
             profileImage: "",
             university: "",
-            //major: "",
+            major: "",
             joinedGroups: [],
+            interests: [],
             createdAt: Date(),
             fcmToken: ""
         )
@@ -127,8 +128,9 @@ class FirebaseAuthService {
                     .imageURL(withDimension: 200)?
                     .absoluteString ?? "",
                 university: "",
-                //major: "",
+                major: "",
                 joinedGroups: [],
+                interests: [],
                 createdAt: Date(),
                 fcmToken: ""
             )
