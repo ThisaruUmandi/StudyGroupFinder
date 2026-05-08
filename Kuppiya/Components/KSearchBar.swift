@@ -1,0 +1,49 @@
+//
+//  KSearchBar.swift
+//  Kuppiya
+//
+//  Created by M H T U De Silva on 2026-04-17.
+//
+
+import SwiftUI
+
+struct KSearchBar: View {
+    @Binding var text: String
+    var placeholder: String = "Search"
+
+    var body: some View {
+        HStack(spacing: 10) {
+            Image(systemName: "magnifyingglass")
+                .foregroundColor(.brandPrimary)
+                .font(.system(size: 16))
+
+            TextField(placeholder, text: $text)
+                .font(.system(size: 14))
+                .autocorrectionDisabled()
+
+            Spacer()
+
+            Button {
+                // mic action
+            } label: {
+                Image(systemName: "mic.fill")
+                    .foregroundColor(.brandPrimary)
+                    .font(.system(size: 16))
+            }
+        }
+        .padding(.horizontal, 16)
+        .frame(height: 48)
+        .background(Color(.systemBackground))
+        .cornerRadius(24)
+        .overlay(
+            RoundedRectangle(cornerRadius: 24)
+                .stroke(Color.brandPrimary, lineWidth: 1.5)
+        )
+    }
+}
+
+#Preview {
+    KSearchBar(text: .constant(""))
+        .padding()
+        //.background(Color.gray.opacity(0.1))
+}
